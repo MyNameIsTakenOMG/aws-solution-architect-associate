@@ -1,11 +1,11 @@
 # aws-solution-architect-associate
 ## Table of Contents
  - [AWS Cloud](#aws-cloud)
- - AWS IAM
- - EC2 Basics
- - EC2 Associate
- - EC2 Instance Storage
- - High Availability & Scalability
+ - [AWS IAM](#aws-iam)
+ - [EC2 Basics](#ec2-basics)
+ - [EC2 Associate](#ec2-associate)
+ - [EC2 Instance Storage](#ec2-instance-storage)
+ - [High Availability & Scalability](#high-availability-&-scalability)
  - RDS, Aurora & ElastiCache
  - Route53
  - Classic Solutions Architecture
