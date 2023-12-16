@@ -26,7 +26,7 @@
  - [AWS Security and Encryption](#aws-security-and-encryption)
  - [AWS VPC](#aws-vpc)
  - [Disaster Recovery and Migration](#disaster-recovery-and-migration)
- - [More Solutions Architecture](more-solutions-architecture)
+ - [More Solutions Architecture](#more-solutions-architecture)
  - [Other services](#other-services)
  - [White Papers and Architectures](#white-papers-and-architectures)
 
