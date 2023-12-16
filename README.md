@@ -31,3 +31,4 @@
  - White Papers & Architectures
 
 ## AWS Cloud
+## High Availability & Scalability
