@@ -127,6 +127,26 @@
    - strategies to allocate spot instances: lowestPrice, diversified, capacityOptimized, priceCapacityOptimized(recommended)
    - Spot Fleets allow us to automatically request Spot Instances with the lowest price
 ## EC2 Associate
+ - Private vs public IP (IPV4)
+   - public IP: machine can be identified on the internet, meaning it's unique across the internet and can be geo-located easily.
+   - private IP: machine can only be identified on a private network, meaning it's unique across the private network, connecting to public internet via NAT and internet gateway. Besides, only a specified range of IPs can be used as private IPs
+ - Elastic IP: a fixed public IP for your EC2 instance, can only be attached to one instance at a time.
+   - can only have up to 5 Elastic IPs in your account (ask aws to increase)
+   - can quickly remap the address to another instance when another was failed
+   - Overall, try to avoid using Elastic IP: 1)often reflect poor architectural decisions. 2)instead, use a random public IP with a registered DNS name. 3)or using a load balancer.
+ - by default, each EC2 instance has a public IP and a private IP
+ - Placement Groups:
+   - strategies: 1)Cluster—clusters instances into a low-latency group in a single Availability Zone. 2)Spread—spreads instances across underlying hardware (max 7 instances per group per AZ). 3)Partition—spreads instances across many different partitions (which rely on different sets of racks) within an AZ. Scales to 100s of EC2 instances per group (Hadoop, Cassandra, Kafka)
+ - Elastic Network Interfaces (ENI): Logical component in a VPC that represents a virtual network card. Can be created independently and attach them on the fly on EC2 instances for failover. ENI is bound to specific AZ.
+   - Primary private IPv4, one or more secondary IPv4
+   - One Elastic IP (IPv4) per private IPv4
+   - One Public IPv4
+   - One or more security groups
+   - A MAC address
+ - EC2 Hibernate: 1)the RAM state is written into root EBS(must be encrypted). 2)long-running processing, services that take time to initialize
+   - the instance RAM size must be less then **150GB**
+   - cannot be in the state of hibernate more than **60 days**
+   - available for **on-demand, spot** instance
 ## EC2 Instance Storage
 ## High Availability and Scalability
 ## RDS Aurora and ElastiCache
