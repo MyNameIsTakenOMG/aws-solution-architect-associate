@@ -164,7 +164,42 @@
 ## Databases in AWS
 ## Data and Analytics
 ## Machine Learning
+ - Rekognition: face detection, content moderation(Set a **Minimum Confidence Threshold** for items that will be flagged. Flag sensitive content for manual review in
+Amazon Augmented AI (A2I)), labeling, celebrity recognition -- detect objects, people, text, and scenes in images or videos
+ - Transcribe:  convert speech to text (ex: subtitles). 1)Uses a deep learning process called automatic speech recognition (ASR) to convert speech to text quickly and accurately. 2)Automatically remove Personally Identifiable Information (PII) using Redaction. 3)Supports Automatic Language Identification for multi-lingual audio.
+ - Polly: text to lifelike speech using deep learning. **Lexicon(Customize the pronunciation of words with Pronunciation lexicons) &  Speech Synthesis Markup Language (SSML, more customization)**
+ - Translate: translations,  localize content
+ - Lex: build conversational bots – chatbots
+ - Connect:  cloud-based virtual contact center
+ - Comprehend: natural language processing(NLP). Analyzing text to find insights and relationships. **Amazon Comprehend Medical**: detects and returns useful information in
+unstructured clinical text. Uses NLP to detect **Protected Health Information (PHI)** – DetectPHI API.
+ - SageMaker: machine learning for every developer and data scientist, easy-to-train models.
+ - Forecast: build highly accurate forecasts -- feeding data and then training the model, last using the model to predict
+ - Kendra: ML-powered search engine -- extract and index contents from documents of different formats, and then make the results indexable.
+ - Personalize: real-time personalized recommendations, integrates into existing websites, apps, SMS, email marketing system
+ - Textract: detect text and data in any scanned documents of any type
 ## AWS Monitoring Audit and Performance
+ - Amazon CloudWatch Metrics: metrics for every service in AWS. Metrics belong to namespaces. Dimension is an attribute of a metric(up to 30). Metrics have timestamps. Custom metrics can be created.
+ - CloudWatch Metric Streams: Continually stream CloudWatch metrics to a destination of your choice, with **near-real-time** delivery and low latency (Kinesis Data Firehose, or 3rd party services, such as datadog). Optionally, **filter metrics** to only stream a subset of them.
+ - CloudWatch Logs: Log groups representing an application. log stream(instance in apps or containers). destinations: s3, opensearch, lambda, kinesis data streams, kinesis data firehose. Encrypted by default, can be encrypted using custom key.
+ - CloudWatch logs sources: SDK, CloudWatch Logs Agent, CloudWatch Unified Agent, Elastic Beanstalk, ECS, AWS Lambda, VPC Flow Logs, API Gateway, CloudTrail, Route53.
+ - CloudWatch Logs Insights: Search and analyze log data stored in CloudWatch Logs. Provides a purpose-built query language. Can query multiple Log Groups in different AWS accounts. It’s a query engine, not a real-time engine.
+ - CloudWatch Logs – S3 Export: take up to 12 hrs. API call(CreateExportTask). Not near-real-time or real-time… use Logs Subscriptions instead.
+ - CloudWatch Logs Subscriptions:  get real-time logs from cloudwatch, and send to Kinesis Data Streams, Kinesis Data Firehose, or Lambda. **Subscription Filter(filter logs)**.
+ - CloudWatch Logs AggregationMulti-Account & Multi-Region: [account1/region1...] -> [Subscription Filter...] -> Kinesis Data Streams -> Kinesis Data Firehose -> S3.
+ - CloudWatch Logs Subscriptions: Cross-Account Subscription – send log events to resources in a different AWS account (KDS, KDF) (**in this case, we need modify the destination cloudwatch service's access policy to accept the logs from the original cloudwatch service. meanwhile, we need a IAM role to allow kinesis data streams to collect logs**)
+ - CloudWatch Logs for EC2: we need **cloudwatch logs agent** running on the EC2 instances with proper IAM permissions.
+ - CloudWatch Logs Agent & Unified Agent: logs agent -- old version, can only send logs to cloudwatch. unified agent -- collect and send logs as well as additional system-level metrics such as RAM, CPU. Centralized configuration using SSM Parameter Store.
+ - CloudWatch Unified Agent – Metrics : CPU, RAM, DISK metrics, Netstat, processes, swap space(free, used)
+ - CloudWatch Alarms: used to trigger notifications for any metrics
+   - Various options (sampling, %, max, min, etc…)
+   - Alarm States: OK, INSUFFICIENT_DATA, ALARM
+   - Period: Length of time in seconds to evaluate the metric (High resolution custom metrics: 10 sec, 30 sec or multiples of 60 sec)
+   - target: EC2, ASG, SNS
+ - CloudWatch Alarms – Composite Alarms: CloudWatch Alarms are on a single metric. Composite Alarms are monitoring the states of multiple other alarms. AND and OR conditions. Helpful to reduce “alarm noise” by creating complex composite alarms.
+ - EC2 Instance Recovery:
+   - status checks: instance status and system status
+ - Good to know: 1)Alarms can be created based on CloudWatch Logs Metrics Filters. 2)to test alarms and notifications, we can use CLI to manually change alarm state.
 ## AWS IAM Advanced
 ## AWS Security and Encryption
 ## AWS VPC
