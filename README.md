@@ -200,6 +200,94 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
  - EC2 Instance Recovery:
    - status checks: instance status and system status
  - Good to know: 1)Alarms can be created based on CloudWatch Logs Metrics Filters. 2)to test alarms and notifications, we can use CLI to manually change alarm state.
+ - Amazon EventBridge:
+   - schedule: cron jobs
+   - event pattern: Event rules to react to a service doing something
+   - trigger lambda, SNS/SQS, ...
+   - can also use event filter
+   - Event buses can be accessed by other AWS accounts using Resource-based Policies
+   - You can archive events (all/filter) sent to an event bus (indefinitely or set period)
+   - Ability to replay archived events
+ - Amazon EventBridge – Schema Registry
+   - EventBridge can analyze the events in your bus and infer the schema
+   - The Schema Registry allows you to generate code for your application, that will know in advance how data is structured in the event bus
+   - Schema can be versioned
+ - Amazon EventBridge – Resource-based Policy
+   - Manage permissions for a specific Event Bus
+   - Example: allow/deny events from another AWS account or AWS region
+ - CloudWatch Container Insights
+   - Collect, aggregate, summarize metrics and logs from containers
+   - containers in ECS, EKS, K8S on EC2, Fargate
+   - In Amazon EKS and Kubernetes, CloudWatch Insights is using a containerized version of the CloudWatch Agent to discover containers
+ - CloudWatch Lambda Insights
+   - Monitoring and troubleshooting solution for serverless applications running on AWS Lambda
+   - collect system-level metrics, such as CPU, diagnostic information, such as cold start
+   - Lambda Insights is provided as a Lambda Layer
+ - CloudWatch Contributor Insights
+   - Analyze log data and create time series that display contributor data. (See metrics about the top-N contributors)
+   - For example, you can find bad hosts, identify the heaviest network users, or find the URLs that generate the most errors.
+   - You can build your rules from scratch, or you can also use sample rules that AWS has created – leverages your CloudWatch Logs
+ - CloudWatch Application Insights (powered by sageMaker)
+   - Provides automated dashboards that show potential problems with monitored applications, to help isolate ongoing issues
+   - Findings and alerts are sent to Amazon EventBridge and SSM OpsCenter
+ - AWS CloudTrail
+   - Provides governance, compliance and audit for your AWS Account
+   - CloudTrail is enabled by default!
+   - Get an history of events / API calls made within your AWS Account. Can put logs from CloudTrail into CloudWatch Logs or S3
+   - A trail can be applied to All Regions (default) or a single Region.
+   - If a resource is deleted in AWS, investigate CloudTrail first!
+ - CloudTrail Events
+   - Management Events: By default, trails are configured to log management events.
+     - Can separate Read Events (that don’t modify resources) from Write Events (that may modify resources)
+     - Operations that are performed on resources in your AWS account
+   - Data Events: By default, data events are not logged (because high volume operations)
+   - CloudTrail Insights Events: Enable CloudTrail Insights to detect unusual activity in your account
+     - CloudTrail Insights analyzes normal management events to create a baseline
+     - And then continuously analyzes write events to detect unusual patterns, send insight events to S3, eventBridge, or cloudtrail console
+ - CloudTrail Events Retention: 90 days in cloudtrail, or send to S3 and use Athena for long-term storage
+ - CloudTrail + EventBridge
+ - AWS Config:  a per-region service
+   - Can be aggregated across regions and accounts
+   - Helps with auditing and recording compliance of your AWS resources. Helps record configurations and changes over time
+   - You can receive alerts (SNS notifications) for any changes
+   - Possibility of storing the configuration data into S3 (analyzed by Athena)
+ - Config Rules
+   - Can use AWS managed config rules (over 75)
+   - Can make custom config rules (must be defined in AWS Lambda)
+   - Rules can be evaluated / triggered: for each configuration change or at regular intervals
+   - AWS Config Rules does not prevent actions from happening (no deny)
+   - pricing: no free tier
+ - Config Rules – Remediations
+   - Automate remediation of non-compliant resources using SSM Automation Documents
+   - Use AWS-Managed Automation Documents or create custom Automation Documents
+   - You can set Remediation Retries if the resource is still non-compliant after auto-remediation
+ - Config Rules – Notifications
+   - Use EventBridge to trigger notifications when AWS resources are non-compliant
+   - Ability to send configuration changes and compliance state notifications to SNS (all events – use SNS Filtering or filter at client-side)
+ - CloudWatch vs CloudTrail vs Config
+   - CloudWatch:
+     - Performance monitoring (metrics, CPU, network, etc…) & dashboards
+     - Events & Alerting
+     - Log Aggregation & Analysis
+   - CloudTrail:
+     - Record API calls made within your Account by everyone
+     - Can define trails for specific resources
+     - Global Service
+   - Config
+     - Record configuration changes
+     - Evaluate resources against compliance rules
+     - Get timeline of changes and compliance
+ - For an Elastic Load Balancer (Example)
+   - CloudWatch:
+     - Monitoring Incoming connections metric
+     - Visualize error codes as % over time
+     - Make a dashboard to get an idea of your load balancer performance
+   - CloudTrail:
+     - Track who made any changes to the Load Balancer with API calls
+   - Config:
+     - Track security group rules for the Load Balancer
+     - Track configuration changes for the Load Balancer
+     - Ensure an SSL certificate is always assigned to the Load Balancer (compliance)
 ## AWS IAM Advanced
 ## AWS Security and Encryption
 ## AWS VPC
