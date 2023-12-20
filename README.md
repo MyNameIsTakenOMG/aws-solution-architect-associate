@@ -291,6 +291,71 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
 ## AWS IAM Advanced
 ## AWS Security and Encryption
 ## AWS VPC
+ - Understanding CIDR (Classless Inter-Domain Routing) – IPv4: Base IP and Subnet Mask
+ - private vs public IP (IPV4)
+   - private IP: 10.0.0.0/8 (big networks), 172.16.0.0/12 (AWS default VPC), 192.168.0.0/16 (home networks)'
+   - All the rest of the IP addresses on the Internet are public
+ - Default VPC: new EC2 instances launched in default VPC if no subnet specified, has internet connectivity and ec2 instances have public ips, private or public DNS names.
+ - VPC in AWS – IPv4
+   - multiple VPCs in an AWS region (max. 5 per region – soft limit)
+   - Max. CIDR per VPC is 5, for each CIDR:
+     - Min. size is /28 (16 IP addresses)
+     - Max. size is /16 (65536 IP addresses)
+   - Because VPC is private, only the Private IPv4 ranges are allowed
+   - Your VPC CIDR should **NOT overlap** with your other networks (e.g.,corporate)
+ - VPC – Subnet (IPv4)
+   - AWS reserves 5 IP addresses (first 4 & last 1) in each subnet
+ - Internet Gateway (IGW): at the VPC level, provide IPv4 & IPv6 Internet Access
+ - Route Tables: must be edited to add routes from subnets to the IGW, VPC Peering Connections, VPC Endpoints, …
+ - Bastion Host:  public EC2 instance to SSH into, that has SSH connectivity to EC2 instances in private subnets
+ - NAT Instances: gives Internet access to EC2 instances in private subnets. Old, must be setup in a public subnet, disable Source / Destination check flag
+ - NAT Gateway – managed by AWS, provides scalable Internet access to private EC2 instances, IPv4 only
+ - NACL – stateless, subnet rules for inbound and outbound, don’t forget Ephemeral Ports
+ - Security Groups – stateful, operate at the EC2 instance level
+ - VPC Peering – connect two VPCs with non overlapping CIDR, non-transitive
+ - VPC Endpoints: Interface endpoint( Provisions an ENI (private IP address) as an entrypoint (must attach a Security Group), S2S VPN, Direct Connect, different VPC) , Gateway endpoint( free, S3 and DynamoDB)
+ - VPC Flow Logs: can be setup at the VPC / Subnet / ENI Level, for ACCEPT and REJECT traffic, helps identifying attacks, analyze using Athena or CloudWatch Logs Insights
+ - Site-to-Site VPN – setup a Customer Gateway on DC, a Virtual Private Gateway on VPC, and site-to-site VPN over public Internet
+ - AWS VPN CloudHub – hub-and-spoke VPN model to connect your sites
+ - Direct Connect – setup a Virtual Private Gateway on VPC, and establish a direct private connection to an AWS Direct Connect Location
+ - Direct Connect Gateway – setup a Direct Connect to many VPCs in different AWS regions
+ - AWS PrivateLink / VPC Endpoint Services:
+   - Connect services privately from your service VPC to customers VPC
+   - Doesn’t need VPC Peering, public Internet, NAT Gateway, Route Tables
+   - Must be used with Network Load Balancer & ENI
+ - ClassicLink – connect EC2-Classic EC2 instances privately to your VPC
+ - Transit Gateway – transitive peering connections for VPC, VPN & DX
+ - Traffic Mirroring – copy network traffic from ENIs for further analysis
+ - Egress-only Internet Gateway – like a NAT Gateway, but for IPv6 (doesn't allow the outside network to initialize the connection first)
+ - Networking Costs in AWS per GB - Simplified
+   - Use Private IP instead of Public IP for good savings and better network performance
+   - Use same AZ for maximum savings (at the cost of high availability)
+   - free for traffic-in and server-private-server(or EC2) in the same AZ, cost a little for AZ-1 -private- AZ-2, cost a bit more for AZ-1 -public- AZ-2, cost more for Region-1 -public- REgion-2
+ - Minimizing egress traffic network cost
+   - Try to keep as much internet traffic within AWS to minimize costs
+   - outbound traffic free
+   - Direct Connect location that are co-located in the same AWS Region result in lower cost for egress network
+ - S3 Data Transfer Pricing – Analysis for USA
+   - ingress free
+   - to internet : 0.09$/GB
+   - transfer acceleration with edge locations: +0.04$/GB - 0.08$/GB
+   - cloudFront: 0.085$/GB (slightly cheaper): caching, reduce cost associated with S3 requests
+   - cross-region: 0.02$/GB
+ - Pricing: NAT Gateway vs Gateway VPC Endpoint
+   - for private subnet EC2 instances, VPC endpoint can save a lot (for S3, using gateway endpoint:free, only charge for data transfer)
+ - Network Protection on AWS
+   - Network Access Control Lists (NACLs)
+   - Amazon VPC security groups
+   - AWS WAF (protect against malicious requests)
+   - AWS Shield & AWS Shield Advanced
+   - AWS Firewall Manager (to manage them across accounts)
+   - AWS Network Firewall (VPC)
+     - From Layer 3 to Layer 7 protection: VPC-VPC, inbound/outbound, VPC-S2S VPN| Direct Connect
+     - can be centrally managed cross-account by AWS Firewall Manager to apply to many VPCs
+     - supports 1000 rules: IP &port, Protocol, stateful domain list, general pattern using regex
+     - Traffic filtering: Allow, drop, or alert for the traffic that matches the rules
+     - Active flow inspection to protect against network threats with intrusion-prevention capabilities (like Gateway Load Balancer, but all managed by AWS)
+     - Send logs of rule matches to Amazon S3, CloudWatch Logs, Kinesis Data Firehose
 ## Disaster Recovery and Migration
 ## More Solutions Architecture
 ## Other services
