@@ -290,6 +290,152 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
      - Ensure an SSL certificate is always assigned to the Load Balancer (compliance)
 ## AWS IAM Advanced
 ## AWS Security and Encryption
+ - Encryption in flight (TLS / SSL): Data is encrypted before sending and decrypted after receiving
+ - Server-side encryption at rest: Data is encrypted after being received by the server and decrypted before being sent. The encryption/decryption keys must be managed somewhere, and the server must have access to it
+ - Client-side encryption: Data is encrypted by the client and never decrypted by the server, Data will be decrypted by a receiving client
+ - AWS KMS (Key Management Service): manages encryption keys for us, fully integrated with IAM for authorization, easy way to control access to your data
+   - Able to audit KMS Key usage using CloudTrail
+   - Seamlessly integrated into most AWS services (EBS, S3, RDS, SSM…)
+   - Never ever store your secrets in plaintext, especially in your code! Use the KMS key to encrypt your secrets so that they can be stored in the code or config file.
+ - KMS Keys Types
+   - Symmetric (AES-256 keys): must call KMS API to use
+   - Asymmetric (RSA & ECC key pairs): Public (Encrypt) and Private Key (Decrypt) pair
+   - AWS Owned Keys (free): SSE-S3, SSE-SQS, SSE-DDB (default key)
+   - AWS Managed Key: free (aws/service-name, example: aws/rds or aws/ebs)
+   - Customer managed keys
+   - Automatic Key rotation:
+     - AWS-managed KMS Key: automatic every 1 year
+     - Customer-managed KMS Key: (must be enabled) automatic every 1 year
+     - Imported KMS Key: only manual rotation possible using alias
+ - Copying Snapshots across regions: have a snapshot encrypted with key1, then copy it and encrypt it with key2 in another region.
+ - KMS Key Policies (similar to S3 bucket policy, which is a resource access policy), the difference is without this policy no one can access it.
+   - Default KMS Key Policy: created if customers don't provide one, and allows anyone to access it.
+   - Custom KMS Key Policy: define users, roles who can access it, and who can administer it. useful for cross-account access of your key.
+   - Copying Snapshots across accounts:
+     - Create a Snapshot, encrypted with your own KMS Key (Customer Managed Key)
+     - Attach a KMS Key Policy to authorize cross-account access
+     - Share the encrypted snapshot
+     - (in target) Create a copy of the Snapshot, encrypt it with a CMK in your account
+     - Create a volume from the snapshot
+ - KMS Multi-Region Keys
+   - Identical KMS keys in different AWS Regions that can be used interchangeably
+   - No need to re-encrypt or making cross-Region API calls
+   - KMS Multi-Region are NOT global (Primary + Replicas)
+   - Each Multi-Region key is managed independently, each has their own key policies
+   - Use cases: global client-side encryption, encryption on Global DynamoDB ( encrypt specific attributes client-side using Amazon DynamoDB Encryption Client), Global Aurora(encrypt specific attributes client-side using AWS Encryption SDK, we can protect specific fields even from database admins)
+ - S3 Replication Encryption Considerations
+   - Unencrypted objects and objects encrypted with SSE-S3 are replicated by default
+   - Objects encrypted with SSE-C (customer provided key) can be replicated
+   - For objects encrypted with SSE-KMS, you need to enable the option
+     - Specify which KMS Key to encrypt the objects within the target bucket
+     - Adapt the KMS Key Policy for the target key
+     - An IAM Role with kms:Decrypt for the source KMS Key and kms:Encrypt for the target KMS Key for S3 replication service
+     - You might get KMS throttling errors, in which case you can ask for a Service Quotas increase
+   - You can use multi-region AWS KMS Keys, but they are currently treated as independent keys by Amazon S3 (the object will still be decrypted and then encrypted)
+ - AMI Sharing Process Encrypted via KMS (cross-account)
+   - AMI in Source Account is encrypted with KMS Key from Source Account
+   - Must modify the image attribute to add a Launch Permission which corresponds to the specified target AWS account
+   - Must share the KMS Keys used to encrypted the snapshot the AMI references with the target account / IAM Role
+   - The IAM Role/User in the target account must have the permissions to DescribeKey, ReEncrypted, CreateGrant, Decrypt
+   - When launching an EC2 instance from the AMI, optionally the target account can specify a new KMS key in its own account to re-encrypt the volumes
+ - SSM Parameter Store: Secure storage for configuration and secrets, optionally can use KMS for encryption, version tracking, security through IAM, notification from EventBridge, integration with CloudFormation
+ - SSM Parameter Store Hierarchy: (eg. /awef/awfea/wafw... )
+ - SSM Parameter tier (standard & advanced)
+   - Parameters Policies (for advanced parameters)
+     - Allow to assign a TTL to a parameter (expiration date) to force updating or deleting sensitive data such as passwords
+     - Can assign multiple policies at a time
+ - AWS Secrets Manager: meant for storing secrets
+   - Capability to force rotation of secrets every X days
+   - Automate generation of secrets on rotation (uses Lambda)
+   - Integration with Amazon RDS (MySQL, PostgreSQL, Aurora)
+   - Secrets are encrypted using KMS
+   - Mostly meant for RDS integration
+ - AWS Secrets Manager – Multi-Region Secrets
+   - Replicate Secrets across multiple AWS Regions
+   - Secrets Manager keeps read replicas in sync with the primary Secret
+   - Ability to promote a read replica Secret to a standalone Secret
+   - Use cases: multi-region apps, disaster recovery strategies, multi-region DB…
+ - AWS Certificate Manager (ACM)
+   - Easily provision, manage, and deploy TLS Certificates
+   - Supports both public( free) and private TLS certificates
+   - Automatic TLS certificate renewal
+   - Cannot use ACM with EC2 (can’t be extracted)
+   - Integrations with ELB, CloudFront, API Gateway
+ - ACM – Requesting Public Certificates
+   - List domain names to be included in the certificate
+   - Select Validation Method: DNS Validation or Email validation
+   - It will take a few hours to get verified
+   - The Public Certificate will be enrolled for automatic renewal (60 days before expiry)
+ - ACM – Importing Public Certificates
+   - Option to generate the certificate outside of ACM and then import it
+   - No automatic renewal
+   - ACM sends daily expiration events
+   - AWS Config has a managed rule named acm-certificate-expiration-check to check for expiring certificates (configurable number of days)
+ - ACM – Integration with ALB
+ - API Gateway - Endpoint Types
+   - Edge-Optimized (default)
+   - Regional
+   - Private
+ - ACM – Integration with API Gateway
+   - Create a Custom Domain Name in API Gateway
+   - Edge-Optimized (default): The TLS Certificate must be in the same region as CloudFront, in us-east-1. The API Gateway still lives in only one region. Then setup CNAME or (better) A-Alias record in Route 53
+   - Regional: The TLS Certificate must be imported on API Gateway, in the same region as the API Stage. Then setup CNAME or (better) A-Alias record in Route 53.
+ - AWS WAF – Web Application Firewall: Protects your web applications from common web exploits (Layer 7 HTTP)
+   - deploy on: ALB, API Gateway, CloudFront, AppSync GraphQL API, Cognito User Pool
+   - Define Web ACL (Web Access Control List) Rules: IP set, SQL injection and XSS, Size constraints, geo-match (block countries), Rate-based rules (to count occurrences of events) – for DDoS protection
+   - Web ACL are Regional except for CloudFront
+   - A rule group is a reusable set of rules that you can add to a web ACL
+ - WAF – Fixed IP while using WAF with a Load Balancer
+   - ALB doesn't have a fixed IP, but we can use Global Accelerator with fixed IPs, then apply WAF onto ALB
+ - AWS Shield: protect from DDoS attack:
+   - DDoS: Distributed Denial of Service – many requests at the same time
+   - AWS Shield Standard: free and activated for every AWS customer
+   - AWS Shield Advanced:  automatically creates, evaluates and deploys AWS WAF rules to mitigate layer 7 attacks. Optional DDoS mitigation service. Protect against more sophisticated attack on Amazon EC2, Elastic Load Balancing (ELB), Amazon CloudFront, AWS Global Accelerator, and Route 53.
+ - AWS Firewall Manager: Manage rules in all accounts of an AWS Organization
+   - Security policy: common set of security rules
+   - Rules are applied to new resources as they are created (good for compliance) across all and future accounts in your Organization
+ - WAF vs. Firewall Manager vs. Shield
+   - WAF, Shield and Firewall Manager are used together for comprehensive protection
+   - Define your Web ACL rules in WAF, For granular protection of your resources, WAF alone is the correct choice
+   - use Firewall Manager with AWS WAF to apply protection across accounts
+   - Shield Advanced adds additional features on top of AWS WAF
+   - If you’re prone to frequent DDoS attacks, consider purchasing Shield Advanced
+ - AWS Best Practices for DDoS Resiliency
+   - Edge Location Mitigation:
+     - CloudFront: natural defense to DDoS
+     - Global Accelerator: integrate with AWS Shield to defend DDoS
+     - Route 53: Domain Name Resolution to defend DDoS
+   - Best pratices for DDoS mitigation
+     - Infrastructure layer defense: using Global Accelerator, Route 53, CloudFront, Elastic Load Balancing
+     - Amazon EC2 with Auto Scaling: in case traffic reach EC2 instances
+     - Elastic Load Balancing: scales along with incoming traffic and distribute the traffic
+   - Application Layer Defense
+     - Detect and filter malicious web requests
+       - CloudFront cache and block specific geographies
+       - WAF on CloudFront and ELB to filter and block certain requests, also the rate-based rules and managed rules can be used to block certain IPs
+     - Shield Advanced:  automatic application layer DDoS mitigation automatically creates, evaluates and deploys AWS WAF rules to mitigate layer 7 attacks
+   - Attack surface reduction
+     - Obfuscating AWS resources: use CloudFront, ELB, and API Gateway to hide backend
+     - Security groups and Network ACLs: Use security groups and NACLs to filter traffic based on specific IP at the subnet or ENI-level. Elastic IP are protected by AWS Shield Advanced
+     - Protecting API endpoints: hide backend, Edge-optimized mode, or CloudFront + regional mode (more control for DDoS), WAF + API Gateway: burst limits, headers filtering, use API keys
+ - Amazon GuardDuty: Intelligent Threat discovery to protect your AWS Account
+   - input data: CloudTrail Events Logs, VPC Flow Logs, DNS Logs, Optional Features(other services logs or events)
+   - can setup EventBridge rules
+   - Can protect against CryptoCurrency attacks (has a dedicated “finding” for it)
+ - Amazon Inspector: Automated Security Assessments on
+   - EC2 instances
+   - Container Images push to Amazon ECR
+   - Lambda Functions
+   - Reporting & integration with AWS Security Hub, Send findings to Amazon Event Bridge
+   - What does Amazon Inspector evaluate? Remember: only for EC2 instances, Container Images & Lambda functions
+     - Continuous scanning of the infrastructure, only when needed
+     - Package vulnerabilities (EC2, ECR & Lambda) – database of CVE
+     - Network reachability (EC2)
+     - A risk score is associated with all vulnerabilities for prioritization
+ - AWS Macie
+   - a fully managed data security and data privacy service that uses machine learning and pattern matching to discover and protect your sensitive data in AWS.
+   - Macie helps identify and alert you to sensitive data, such as personally identifiable information (PII)
+
 ## AWS VPC
  - Understanding CIDR (Classless Inter-Domain Routing) – IPv4: Base IP and Subnet Mask
  - private vs public IP (IPV4)
