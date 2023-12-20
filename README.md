@@ -357,6 +357,102 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
      - Active flow inspection to protect against network threats with intrusion-prevention capabilities (like Gateway Load Balancer, but all managed by AWS)
      - Send logs of rule matches to Amazon S3, CloudWatch Logs, Kinesis Data Firehose
 ## Disaster Recovery and Migration
+ - Overview:
+   - Disaster recovery (DR) is about preparing for and recovering from a disaster
+   - types of DR:
+     - On-premise => On-premise: traditional DR, and very expensive
+     - On-premise => AWS Cloud: hybrid recovery
+     - AWS Cloud Region A => AWS Cloud Region B
+   - RPO(Recovery Point Objective -- data lose) and RTO (Recovery Time Objective -- down time)
+   - Disaster Recovery Strategies
+     - Backup and Restore (High RPO, either AWS storage gateway and snow family or schedule regular snapshots)
+     - Pilot Light (core functionality is always running, such as database) -- data replication
+     - Warm Standby (minimal version of full system is running, quickly to scale up ) -- data replication
+     - Hot Site / Multi Site Approach (very low RTO, pricy, full production scale is always running on-prem and AWS)
+   - DR Tips:
+     - Backup
+       - EBS or RDS snapshots/backups, etc
+       - regular push to S3/ S3 IA/ Glacier, lifecycle policy, cross-region replication
+       - from on-premise: snowball or storage gateway
+     - High Availability
+       - use Route53 to migrate DNS from region to region
+       - RDS multi-AZ, elastiCache multi-AZ, EFS, S3
+       - S2S VPN as failover for Direct Connect
+     - Replication
+       - RDS cross-region replica, Aurora + global database
+       - storage gateway
+       - on-prem DB to RDS
+     - Automation
+       - CloudFormation/ Elastic Beanstalk to re-create a whole new env
+       - recover EC2 instances when Cloudwatch alarms
+       - Lambda functions for customized automation
+     - chaos
+       - Netflix has a “simian-army” randomly terminating EC2
+ - DMS – Database Migration Service: Quickly and securely migrate databases to AWS, resilient, self-healing
+   - The source database remains available during the migration
+   - an EC2 instance is a must for running DMS
+   - Continuous Data Replication using CDC
+   - supports: Homogeneous migrations / Heterogeneous migrations
+   - Source and Target: take a DB and export or import it onto any DBs that AWS supports
+   - AWS Schema Conversion Tool (SCT)
+     - Convert your Database’s Schema from one engine to another
+     - You do not need to use SCT if you are migrating the same DB engine
+   - DMS - Continuous Replication: install and setup SCT(schema convertion tool) on-prem to convert the schema, and have an EC2 instance with DMS and CDC(change data capture) installed to do continuous replication
+   - AWS DMS – Multi-AZ Deployment
+     - When Multi-AZ Enabled, DMS provisions and maintains a synchronous stand replica in a different AZ
+     - Advantages:
+       - provider data redundancy
+       - eliminate I/O freeze
+       - minimize latency spike
+ - RDS & Aurora MySQL Migrations
+   - RDS MySQL to Aurora MySQL
+     - Option 1: DB Snapshots from RDS MySQL restored as MySQL Aurora DB
+     - Option 2: Create an Aurora Read Replica from your RDS MySQL, and when the replication lag is 0, promote it as its own DB cluster (can take time and cost $)
+   - External MySQL to Aurora MySQL
+     - Option 1: use Percona Xtrabackup to create a backup file in S3, then import the file into Aurora
+     - Option 2: create Aurora mysql DB, then use the **mysqldump** utility to migrate Mysql to Aurora (slower than S3)
+   - Use DMS if both databases are up and running
+ - RDS & Aurora PostgreSQL Migrations
+   - RDS PostgreSQL to Aurora PostgreSQL : similar to how migrate RDS mysql to Aurora myssql
+   - External PostgreSQL to Aurora PostgreSQL: create a backup file in S3, then import it into Aurora postgres using **aws_s3 Aurora extension**
+   - Use DMS if both databases are up and running
+ - On-Premise strategy with AWS
+   - Ability to download Amazon Linux 2 AMI as a VM (.iso format): VMWare, KVM, VirtualBox (Oracle VM), Microsoft Hyper-V.
+   - VM Import / Export: Migrate existing applications into EC2. Create a DR repository strategy for your on-premises VMs. Can export back the VMs from EC2 to on-premises.
+   - AWS Application Discovery Service: gather info on on-prem servers to plan a migration. Server utilization and dependency mappings. Track with AWS Migration Hub
+   - AWS Database Migration Service (DMS): works with various DBs, can do on-prem <--> AWS, AWS <--> AWS
+   - AWS Server Migration Service (SMS): Incremental replication of on-premises live servers to AWS
+ - AWS Backup (fully managed, no need for custom script or manual process)
+   - Centrally manage and automate backups across AWS services
+   - support cross-account / cross-region backups
+   - support many services
+   - Supports PITR for supported services
+   - On-Demand and Scheduled backups
+   - Tag-based backup policies
+   - You create backup policies known as Backup Plans: backup frequency, backup window, transition to cold storage, retention period
+ - AWS Backup Vault Lock (Backup Vault Lock Policy)
+   - Enforce a WORM (Write Once Read Many) state for all the backups that you store in your AWS Backup Vault
+   - Additional layer of defense to protect your backups against
+   - Even the root user cannot delete backups when enabled
+ - AWS Application Discovery Service + AWS Application Migration Service (MGN)
+   - Plan migration projects by gathering information about on-premises data centers. Server utilization data and dependency mapping are important for migrations
+   - Agentless Discovery (AWS Agentless Discovery Connector) / Agent-based Discovery (AWS Application Discovery Agent)
+   - Resulting data can be viewed within AWS Migration Hub
+   - Lift-and-shift (rehost) solution which simplify migrating applications to AWS
+   - Converts your physical, virtual, and cloud-based servers to run natively on AWS (staging: low-cost EC2 instances & EBS volumes, then perform a cutover to switch to production: target EC2 instances and EBS volumes)
+   - Supports wide range of platforms, Operating Systems, and databases
+   - Minimal downtime, reduced costs
+ - Transferring large amount of data into AWS
+   - Example: transfer 200 TB of data in the cloud. We have a 100 Mbps internet connection.
+   - 1)Over the internet / Site-to-Site VPN: quick setup, but takes very long time
+   - 2)Over direct connect 1Gbps: long time to setup(more than 1 month), much quicker than the first way
+   - 3)Over Snowball: Will take 2 to 3 snowballs in parallel and take about 1 week for e2e transfer, and can be combined with DMS
+   - 4)For on-going replication / transfers: Site-to-Site VPN or DX with DMS or DataSync
+ - VMware Cloud on AWS
+   - Some customers use VMware Cloud to manage their on-premises Data Center. They want to extend the Data Center capacity to AWS, but keep using the VMware Cloud software. Enter VMware Cloud on AWS
+   - use cases: Migrate your VMware vSphere-based workloads to AWS
+   - Run your production workloads across VMware vSphere-based private, public, and hybrid cloud environments
+   - Have a disaster recover strategy
 ## More Solutions Architecture
 ## Other services
 ## White Papers and Architectures
