@@ -693,4 +693,53 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
    - using ASG, and user data attachment based on Tag for elastic IP
    - ASG + EBS, ASG terminate lifecycle hook: create an EBS snapshot with tag, then when a new instance launched in a new AZ, ASG launch lifecycle hook: create EBS volume from the snapshot.
 ## Other services
+ - CloudFormation: a declarative way of outlining your AWS Infrastructure, for any resources (most of them are supported).
+   - CloudFormation creates any resources for you based on your requirements, in the right order, with the exact configuration that you specify
+   - Infrastructure as code
+   - cost: Savings strategy: In Dev, you could automation deletion of templates at 5 PM and recreated at 8 AM, safely. Each resources within the stack is tagged with an identifier so you can easily see how much a stack costs you
+   - Productivity: Ability to destroy and re-create an infrastructure on the cloud on the fly
+   - Don’t re-invent the wheel: using exiting template or documentation
+   - Supports (almost) all AWS resources: You can use “custom resources” for resources that are not supported
+   - CloudFormation Stack Designer
+ - Amazon Simple Email Service (Amazon SES): Fully managed service to send emails securely, globally and at scale
+ - Amazon Pinpoint: Scalable 2-way (outbound/inbound) marketing communications service ( email, SMS, push, voice, and in-app messaging)
+   - Versus Amazon SNS or Amazon SES: In Amazon Pinpoint, you create message templates, delivery schedules, highly-targeted segments, and full campaigns. In SNS & SES you managed each message's audience, content, and delivery schedule
+ - Systems Manager – SSM Session Manager: Allows you to start a secure shell on your EC2 and on-premises servers (no need port 22, SSH access key, bastion host, just need IAM permission)
+ - Systems Manager – Run Command: Execute a document (= script) or just run a command on multiple instances. no need SSH. Output sent to S3 or cloudwatch log. send notifications to SNS. can be invoke by EventBridge. Integrate with IAM and CloudTrail
+ - Systems Manager – Patch Manager: Automates the process of patching managed instances. Support multiple OS and EC2 and on-prem. Patch on-demand or scheduled using **Maintenance Window**. Scan instances and generate patch compliance report (missing patches)
+ - Systems Manager – Maintenance Windows: Defines a schedule for when to perform actions on your instances
+   - schedule
+   - duration
+   - Set of registered instances
+   - Set of registered tasks
+ - Systems Manager - Automation
+   - Simplifies common maintenance and deployment tasks of EC2 instances and other AWS resources
+   - Examples: restart instances, create an AMI, EBS snapshot
+   - Automation Runbook – SSM Documents to define actions preformed on your EC2 instances or AWS resources (pre-defined or custom)
+   - Can be triggered using: AWS Console, AWS CLI or SDK, EventBridge, On a schedule using Maintenance Windows, By AWS Config for rules remediations
+ - Cost Explorer: Visualize, understand, and manage your AWS costs and usage over time (monthly,hourly...) 
+   - Choose an optimal Savings Plan (to lower prices on your bill)
+   - Forecast usage up to 12 months based on previous usage
+ - Amazon Elastic Transcoder: Elastic Transcoder is used to convert media files stored in S3 into media files in the formats required by consumer playback devices (phones, etc..)
+   - s3 input --> transcoder --> s3 output --> client
+   - highly scalable, easy-to-use, cost-effective, fully managed&secure, pay what you use
+ - AWS Batch: Fully managed batch processing at any scale(100,000s)
+   - dynamically launch EC2 instances or Spot Instances
+   - provisions the right amount of compute / memory
+   - submit or schedule batch jobs and AWS Batch does the rest!
+   - Batch jobs are defined as Docker images and run on ECS
+   - Helpful for cost optimizations and focusing less on the infrastructure
+ - AWS Batch vs Lambda(serverless, limited time, limited runtimes, Limited temporary disk space)
+   - No time limit
+   - Any runtime as long as it’s packaged as a Docker image
+   - Rely on EBS / instance store for disk space
+   - Relies on EC2 (can be managed by AWS)
+ - Amazon AppFlow: Fully managed integration service that enables you to securely transfer data between Software-as-a-Service (SaaS) applications and AWS
+   - source: Salesforce, SAP, Zendesk, Slack, and ServiceNow
+   - destination: AWS services like Amazon S3, Amazon Redshift or non-AWS such as SnowFlake and Salesforce
+   - on-demand or schedule
+   - data transformation
+   - Encrypted over the public internet or privately over AWS PrivateLink (VPC endpoint)
+   - Don’t spend time writing the integrations and leverage APIs immediately
+ - AWS Amplify - web and mobile applications version of Elastic Beanstalk: A set of tools and services that helps you develop and deploy scalable full stack web and mobile applications
 ## White Papers and Architectures
