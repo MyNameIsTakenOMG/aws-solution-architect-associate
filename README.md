@@ -741,5 +741,43 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
    - data transformation
    - Encrypted over the public internet or privately over AWS PrivateLink (VPC endpoint)
    - Don’t spend time writing the integrations and leverage APIs immediately
- - AWS Amplify - web and mobile applications version of Elastic Beanstalk: A set of tools and services that helps you develop and deploy scalable full stack web and mobile applications
+ - AWS Amplify - web and mobile applications version of Elastic Beanstalk: A set of tools and services that helps you develop and deploy scalable full-stack web and mobile applications
 ## White Papers and Architectures
+- Well-Architected Framework General Guiding Principles
+  - Stop guessing your capacity needs
+  - Test systems at production scale
+  - Automate to make architectural experimentation easier
+  - Allow for evolutionary architectures: Design based on changing requirements
+  - Drive architectures using data
+  - Improve through game days: Simulate applications for flash sale days
+- Well-Architected Framework 6 Pillars
+  - 1) Operational Excellence
+  - 2) Security
+  - 3) Reliability
+  - 4) Performance Efficiency
+  - 5) Cost Optimization
+  - 6) Sustainability
+  - 7) They are not something to balance, or trade-offs, they’re a synergy
+- AWS Well-Architected Tool: Free tool to review your architectures against the 6 pillars Well-Architected Framework and adopt architectural best practices
+- Trusted Advisor: high level AWS account assessment on 5 categories:
+  - Cost optimization
+  - Performance
+  - Security
+  - Fault tolerance
+  - Service limits
+- Trusted Advisor – Support Plans
+  - Basic & Developer Support plan:7 CORE CHECKS
+    - S3 Bucket Permissions
+    - Security Groups – Specific Ports Unrestricted
+    - IAM Use (one IAM user minimum)
+    - MFA on Root Account
+    - EBS Public Snapshots
+    - RDS Public Snapshots
+    - Service Limits
+  - Business & Enterprise Support plan: Full Checks available on the 5 categories. Programmatic Access using AWS Support API. Ability to set CloudWatch alarms when
+reaching limits
+
+
+
+
+
