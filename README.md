@@ -600,5 +600,66 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
    - Run your production workloads across VMware vSphere-based private, public, and hybrid cloud environments
    - Have a disaster recover strategy
 ## More Solutions Architecture
+ - Event processing in AWS:
+   - Lambda, SQS, SNS:
+     - SQS ---> Lambda, then SQS send ---> DLQ
+     - SQS FIFO ---> Lambda, then SQS send ---> DLQ 
+     - SNS async---> Lambda(retry), then Lambda send DLQ ---> SQS
+   - fan-out pattern:
+     - SDK ---> SNS ---> SQS *n (subscribed)
+   - S3 Event notifications : S3 send:events ---> SQS, SNS, Lambda
+   - S3 Event notifications with EventBridge:
+     - S3 send:events ---> EventBridge ---> over 18 AWS services as destinations
+     - Advanced filtering options with JSON rules (metadata, object size, name...)
+     - Multiple Destinations – ex Step Functions, Kinesis Streams / Firehose…
+     - EventBridge Capabilities – Archive, Replay Events, Reliable delivery
+   - Amazon EventBridge – Intercept API Calls: CloudTrail will catch any API calls and send corresponding events to the EVentBridge, and EventBridge will send events or alerts to certain destination, such as SNS.
+   - API Gateway – AWS Service Integration Kinesis Data Streams example (external events):
+     - client send requests ---> API Gateway ---> Kinesis Data Stream ---> Kinesis Data Firehose ---> S3
+ - Caching Strategies:
+   - client ---> CloudFront ---> API Gateway ---> App logic (EC2 / Lambda) ---> Databases / (ElastiCache or DAX) // dynamic routes with dynamic contents
+     - CloudFront(edge) ---> S3 // static contents
+   - Caching, TTL, Network, Computation, Cost, latency
+   - CloudFront: help cache contents at the edge location which is close to the end users (setup TTL in case of any change of the contents)
+   - API Gateway (regional): cache between clients and API gateway
+   - the backend logic doesn't have any cache capability, but the in-memory DB or DAX could help cache some complicated queries
+   - there's no cache in S3 buckets or DBs.
+ - Blocking an IP address
+   - with NACL as well as security group, we can deny certain IP addresses
+   - for NLB(fixed IP address), ALB, make sure security group for EC2 instances allow traffic from load balancers
+   - for ALB, we can use WAF to do some more complex IP filtering
+   - with CloudFront, we can restrict IPs from certain geo-locations, and also by using WAF, we can block certain IPs
+ - High Performance Computing (HPC): quickly add resources within no time and pay only what you use, then what services help perform HPC?
+   - Data Management & Transfer:
+     - AWS Direct Connect: Move GB/s of data to the cloud, over a private secure network
+     - Snowball & Snowmobile: Move PB of data to the cloud
+     - AWS DataSync: Move large amount of data between on-premises and S3, EFS, FSx for Windows
+   - Compute and Networking
+     - EC2 Instances: CPU optimized, GPU optimized, Spot Instances / Spot Fleets for cost savings + Auto Scaling
+     - EC2 Placement Groups: Cluster for good network performance
+     - EC2 Enhanced Networking (SR-IOV)
+       - Higher bandwidth, higher PPS (packet per second), lower latency
+       - Option 1: **Elastic Network Adapter (ENA)** up to 100 Gbps
+       - Option 2: Intel 82599 VF up to 10 Gbps – LEGACY
+     - **Elastic Fabric Adapter (EFA)**
+       - Improved ENA for HPC, only works for Linux
+       - Great for inter-node communications, tightly coupled workloads
+       - Leverages Message Passing Interface (MPI) standard
+       - **Bypasses the underlying Linux OS to provide low-latency, reliable transport**
+   - Storage
+     - Instance-attached storage:
+       - EBS: scale up to 256,000 IOPS with io2 Block Express
+       - Instance Store: scale to millions of IOPS, linked to EC2 instance, low latency
+     - Network storage:
+       - Amazon S3: large blob, not a file system
+       - Amazon EFS: scale IOPS based on total size, or use provisioned IOPS
+       - Amazon FSx for Lustre: HPC optimized distributed file system, millions of IOPS. Backed by S3
+   - Automation and Orchestration
+     - AWS Batch: AWS Batch supports multi-node parallel jobs, which enables you to run single jobs that span multiple EC2 instances. Easily schedule jobs and launch EC2 instances accordingly.
+     - AWS ParallelCluster: Open-source cluster management tool to deploy HPC on AWS. Configure with text files. Automate creation of VPC, Subnet, cluster type and instance types. Ability to enable EFA on the cluster (improves network performance)
+ - Creating a highly available EC2 instance
+   - having a standby EC2 instance, cloudwatch and lambda (start the standby instance and attach it with the elastic IP)
+   - using ASG, and user data attachment based on Tag for elastic IP
+   - ASG + EBS, ASG terminate lifecycle hook: create an EBS snapshot with tag, then when a new instance launched in a new AZ, ASG launch lifecycle hook: create EBS volume from the snapshot.
 ## Other services
 ## White Papers and Architectures
