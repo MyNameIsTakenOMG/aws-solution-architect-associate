@@ -152,6 +152,37 @@
 ## RDS Aurora and ElastiCache
 ## Route53
 ## Classic Solutions Architecture
+ - stateless web app(maybe some api endpoints): Route53 -- client -- ELBs(ALB):Multi-AZ -- ASG(multi-az): EC2 reserved capacity (cost-saving)
+   - cost: ASG to ensure right amount of EC2 instances, and reserved capacity instances
+   - performance: ELB and ASG
+   - reliability: Route53 reliably 'direct' traffic to the ELB
+   - security: security group for EC2 instances
+   - operational experience: from manually managing EC2 instances to automatically managing EC2 using ASG
+ - stateful web app(such as online shopping web):
+   - Route53 -- client -- ELB: multi-az -- ASG(multi-az): EC2 instances -- ElastiCache(multi-az) (store session data or cache query data(lazy-loading)) + RDS(multi-az,read replicas) /DynamoDB/...
+   - security groups: elastiCache or DBs secruity groups restricted from EC2 security groups
+ - stateful web app(such as wordpress web):
+   - we can use Aurora multi-az to go very scalable and available, and as for storing images, we can choose EFS or S3(more preferred nowadays)
+ - Instantiating Applications quickly
+   - EC2 Instances:
+     - Use a Golden AMI: Install your applications, OS dependencies etc.. beforehand and launch your EC2 instance from the Golden AMI
+     - Bootstrap using User Data: For dynamic configuration, use User Data scripts
+     - Hybrid: mix Golden AMI and User Data (Elastic Beanstalk)
+   - RDS Databases: Restore from a snapshot: the database will have schemas and data ready!
+   - EBS Volumes: Restore from a snapshot: the disk will already be formatted and have data!
+ - Elastic Beanstalk – Overview
+   - It uses all the component’s we’ve seen before: EC2, ASG, ELB, RDS, …
+   - We still have full control over the configuration
+   - Managed service:
+     - Automatically handles capacity provisioning, load balancing, scaling, application health monitoring, instance configuration, …
+     - only application code is the responsibility for the developer
+ - Elastic Beanstalk – Components
+   - Application: collection of Elastic Beanstalk components (environments, versions, configurations, …)
+   - Application Version: an iteration of your application code
+   - Environment: Collection of AWS resources running an application version (only one application version at a time)
+     - Tiers: Web Server Environment Tier & Worker Environment Tier
+     - You can create multiple environments (dev, test, prod, …)
+
 ## S3
 ## S3 Advanced
 ## S3 Security
