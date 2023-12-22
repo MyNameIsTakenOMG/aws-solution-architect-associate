@@ -148,6 +148,69 @@
    - cannot be in the state of hibernate more than **60 days**
    - available for **on-demand, spot** instance
 ## EC2 Instance Storage
+ - EBS Volume: An EBS (Elastic Block Store) Volume is a network drive you can attach to your instances while they run. It allows your instances to persist data, even after their termination(Root EBS will be terminated by default, can be turned off). It is bound to a specific availability zone(**AZ**). To move around, we need snapshot.
+ - EBS – Delete on Termination attribute: by default, root EBS will be deleted, any other EBS will be kept. The behaviour of both types of EBS can be modified via console or CLI.
+ - EBS Snapshots: Make a backup (snapshot) of your EBS volume at a point in time. Not necessary to detach volume to do snapshot, but recommended. Can copy snapshots across AZ or Region
+ - EBS Snapshots Features:
+   - EBS Snapshot Archive: 75% cheaper than normal snapshot. Takes within 24 to 72 hours for restoring the archive
+   - Recycle Bin for EBS Snapshots: Setup rules to retain deleted snapshots so you can recover them after an accidental deletion. Specify retention (from 1 day to 1 year)
+   - Fast Snapshot Restore (FSR): Force full initialization of snapshot to have no latency on the first use ($$$)
+ - AMI Overview (Amazon Machine Image)
+   - AMI are a customization of an EC2 instance
+   - AMI are built for a specific region (and can be copied across regions):
+     - Faster boot / configuration time because all your software is pre-packaged
+     - You add your own software, configuration, operating system, monitoring…
+   - You can launch EC2 instances from: A Public AMI(AWS provided), Your own AMI(you make and maintain them yourself), An AWS Marketplace AMI: an AMI someone else made (and potentially sells)
+ - AMI Process (from an EC2 instance)
+   - Start an EC2 instance and customize it
+   - Stop the instance (for data integrity)
+   - Build an AMI – this will also create EBS snapshots(behind the scenes)
+   - Launch instances from other AMIs
+ - EC2 Instance Store
+   - EBS volumes are network drives with good but “limited” performance
+   - If you need a **high-performance hardware disk**, use EC2 Instance Store
+   - great I/O, EC2 Instance Store lose their storage if they’re stopped (ephemeral). Good for buffer / cache / scratch data / temporary content.Risk of data loss if hardware fails. Backups and Replication are your responsibility.
+ - EBS Volume Types
+   - EBS Volumes come in 6 types
+     - gp2 / gp3 (SSD): General purpose SSD volume that balances price and performance for a wide variety of workloads
+       - use case: 1GB--16TB, gp3: baseline (3000I/O, 125MB/s), up to 16000I/O, 1000MB/s independently. gp2: burst to 3000I/O, size and I/O linked, max 16000I/O
+     - io1 / io2 (SSD): Highest-performance SSD volume for mission-critical low-latency or high-throughput workloads
+       - use case: more than 16000I/O, Great for databases workloads (sensitive to storage perf and consistency), io1/io2 (4 GiB - 16 TiB): size and I/O independent, max 64000I/O for Nitro & 32000 for other. io2 Block Express (4 GiB – 64 TiB):Sub-millisecond latency, Max PIOPS: 256,000 with an IOPS:GiB ratio of 1,000:1. **Supports EBS Multi-attach**
+     - st1 (HDD): Low cost HDD volume designed for frequently accessed, throughput-intensive workloads
+     - sc1 (HDD): Lowest cost HDD volume designed for less frequently accessed workloads
+       - use case(HDD): Cannot be a boot volume. 125 GiB to 16 TiB. st1: Max throughput 500 MiB/s – max IOPS 500, Big Data, Data Warehouses, Log Processing. sc1: Max throughput 250 MiB/s – max IOPS 250, Scenarios where lowest cost is important
+   - EBS Volumes are characterized in Size | Throughput | IOPS (I/O Ops Per Sec)
+   - **Only gp2/gp3 and io1/io2 can be used as boot volumes**
+ - EBS Multi-Attach – io1/io2 family
+   - Attach the same EBS volume to multiple EC2 instances in the same AZ
+   - Each instance has full read & write permissions to the high-performance volume
+   - Up to 16 EC2 Instances at a time
+   - Use case: Achieve higher application availability in clustered Linux applications (ex: Teradata). Applications must manage concurrent write operations
+   - Must use a file system that’s cluster-aware (not XFS, EXT4, etc…)
+ - EBS Encryption
+   - Encryption and decryption are handled transparently (you have nothing to do)
+   - Encryption has a minimal impact on latency
+   - EBS Encryption leverages keys from KMS (AES-256)
+   - **Copying an unencrypted snapshot allows encryption**
+   -  encrypted EBS volume: data at rest, data in flight , snapshots, volumes from snapshots are all encrypted
+   -  Snapshots of encrypted volumes are encrypted
+ - Encryption: encrypt an unencrypted EBS volume: create a snapshot from an unencrypted EBS, then using **copy** operation to encrypt the snapshot, then create an EBS from the snapshot.
+ - Amazon EFS – Elastic File System
+   - Managed NFS (network file system) that can be mounted on many EC2
+   - EFS works with EC2 instances in multi-AZ
+   - Highly available, scalable, expensive (3x gp2), pay per use
+   - Use cases: content management, web serving, data sharing, Wordpress
+   - Uses NFSv4.1 protocol, and use security group to control access to EFS
+   - **Compatible with Linux based AMI (not Windows)**
+   - Encryption at rest using KMS
+   - POSIX file system (~Linux) that has a standard file API
+   - File system scales automatically, pay-per-use, no capacity planning!
+ - EFS – Performance & Storage Classes
+   - EFS Scale: 1000s of concurrent NFS clients, 10 GB+ /s throughput, Grow to Petabyte-scale network file system, automatically
+   - Performance Mode (set at EFS creation time): General Purpose (default)--web server, CMS,etc... Max I/O--big data, media processing
+   - Throughput Mode: Bursting , Provisioned(regardless size), Elastic
+   - Storage Tiers (lifecycle management feature– move file after N days): Standard, Infrequent access (EFS-IA)
+   - Availability and durability: Standard--multi-AZ, One Zone -- could save 90% cost
 ## High Availability and Scalability
 ## RDS Aurora and ElastiCache
 ## Route53
