@@ -380,6 +380,47 @@ using CloudWatch)
      - You can create multiple environments (dev, test, prod, …)
 
 ## S3
+ - one of the main building blocks of AWS. Infinitely scaling. Can host website and integrate with other AWS services.
+ - use cases: Backup and storage, Disaster Recovery, Application hosting, Data lakes & big data analytics, Static website, Software delivery...
+ - store files in buckets(directories), which must have a global unique name(across all regions, all accounts).
+ - buckets that defined at the region level
+ - S3 is not a global service
+ - bucket -- naming conventions include: Must NOT start with the prefix `xn--`, Must NOT end with the suffix `-s3alias`, No uppercase, No underscore, Must start with lowercase letter or number, 3-63 characters long, Not an IP.
+ - objects: Objects (files) have a Key, is the FULL path and  composed of prefix + object name (There’s no concept of “directories” within buckets, Just keys with very long names that contain slashes (“/”))
+ - objects (cont.): Object values are the content of the body(Max. Object Size is 5TB (5000GB), If uploading more than 5GB, must use “multi-part upload”). Metadata , Tags(useful for security / lifecycle) ,Version ID (if versioning is enabled)
+ - Security:
+   - User-based: IAM user policies
+   - Resource-Based: Bucket Policies / Object Access Control List (ACL) / Bucket Access Control List (ACL)
+   - **note:** an IAM principal can access an S3 object if the user IAM permissions ALLOW it OR the resource policy ALLOWS it AND there’s no explicit DENY
+   - encryption: encrypt objects in Amazon S3 using encryption keys
+ - S3 Bucket Policies: JSON based policies (Resources, effect, actions, principals)
+ - Amazon S3 – Static Website Hosting: S3 can host static websites and have them accessible on the Internet. If you get a 403 Forbidden error, make sure the bucket policy allows public reads!
+ - Amazon S3 -Versioning (It is enabled at the bucket level)
+   - It is best practice to version your buckets (Protect against unintended deletes (ability to restore a version), Easy roll back to previous version)
+   - Notes: Any file that is not versioned prior to enabling versioning will have version “null”. Suspending versioning does not delete the previous versions
+ - Amazon S3 – Replication (Cross-Region Replication CRR & Same-Region Replication SRR): Must enable Versioning in source and destination buckets. Must give proper IAM permissions to S3. Copying is asynchronous. Buckets can be in different AWS accounts
+   - After you enable Replication, only new objects are replicated
+   - Optionally, you can replicate existing objects using S3 Batch Replication (Replicates existing objects and objects that failed replication)
+   - For DELETE operations (Can replicate delete markers from source to target (optional setting), Deletions with a version ID are not replicated (to avoid malicious deletes))
+   - There is no “chaining” of replication (eg. objects in bucket 1 will not be replicated into bucket 3)
+ - S3 Storage Classes:
+   - S3 Standard - General Purpose: Low latency and high throughput, Used for frequently accessed data (Use Cases: Big Data analytics, mobile & gaming applications, content
+distribution…)
+   - S3 Standard-Infrequent Access (IA): For data that is less frequently accessed, but requires rapid access when needed (Disaster Recovery, backups)
+   - S3 One Zone-Infrequent Access: Use Cases: Storing secondary backup copies of on-premises data, or data you can recreate (data lost when AZ destroyed)
+   - S3 Glacier Instant Retrieval: Minimum storage duration of 90 days, Millisecond retrieval
+   - S3 Glacier Flexible Retrieval: Minimum storage duration of 90 days, Expedited (1 to 5 minutes), Standard (3 to 5 hours), Bulk (5 to 12 hours) – free
+   - S3 Glacier Deep Archive: Minimum storage duration of 180 days, Standard (12 hours), Bulk (48 hours)
+   - S3 Intelligent Tiering: no retrieval charges, Small monthly monitoring and auto-tiering fee, Moves objects automatically between Access Tiers based on usage
+     - Frequent Access tier (automatic): default tier
+     - Infrequent Access tier (automatic): objects not accessed for 30 days
+     - Archive Instant Access tier (automatic): objects not accessed for 90 days
+     - Archive Access tier (optional): configurable from 90 days to 700+ days
+     - Deep Archive Access tier (optional): config. from 180 days to 700+ days
+   - Can move between classes manually or using S3 Lifecycle configurations:
+ - S3 Durability and Availability
+   - Durability: High durability (99.999999999%, 11 9’s) of objects across multiple AZ (Same for all storage classes)
+   - Availability:Varies depending on storage class
 ## S3 Advanced
 ## S3 Security
 ## CloudFront and Global Accelerator
