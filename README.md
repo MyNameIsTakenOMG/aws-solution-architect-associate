@@ -422,6 +422,38 @@ distribution…)
    - Durability: High durability (99.999999999%, 11 9’s) of objects across multiple AZ (Same for all storage classes)
    - Availability:Varies depending on storage class
 ## S3 Advanced
+ - Amazon S3 – Moving between Storage Classes: You can transition objects between storage classes, Moving objects can be automated using a Lifecycle Rules
+ - Amazon S3 – Lifecycle Rules: Rules can be created for a certain prefix, Rules can be created for certain objects Tags 
+   - Transition Actions – configure objects to transition to another storage class
+   - Expiration actions – configure objects to expire (delete) after some time (Can be used to delete old versions of files (if versioning is enabled),Can be used to delete incomplete Multi-Part uploads)
+ - Amazon S3 Analytics – Storage Class Analysis
+   - Help you decide when to transition objects to the right storage class
+   - Recommendations for Standard and Standard IA (Does NOT work for One-Zone IA or Glacier)
+   - Report is updated daily
+   - 24 to 48 hours to start seeing data analysis
+   - Good first step to put together Lifecycle Rules (or improve them)!
+ - S3 – Requester Pays: In general, bucket owners pay for all Amazon S3 storage and data transfer costs associated with their bucket
+   - With Requester Pays buckets, the requester instead of the bucket owner pays the cost of the request and the data download from the bucket
+   - Helpful when you want to share large datasets with other accounts
+   - The requester must be authenticated in AWS (cannot be anonymous)
+ - S3 Event Notifications: Can create as many “S3 events” as desired, Object name filtering possible, S3 event notifications typically deliver events in seconds but can sometimes take a minute or longer
+   - SNS, SQS, Lambda (resources access policies)
+   - S3 Event Notifications with Amazon EventBridge: 
+     - Multiple Destinations – ex Step Functions, Kinesis Streams / Firehose…
+     - Advanced filtering options with JSON rules (metadata, object size, name...)
+     - EventBridge Capabilities – Archive, Replay Events, Reliable delivery
+ - S3 – Baseline Performance
+   - Amazon S3 automatically scales to high request rates, latency 100-200 ms
+   - Your application can achieve at least 3,500 PUT/COPY/POST/DELETE or 5,500 GET/HEAD requests per second per prefix in a bucket.
+ - S3 Performance
+   - Multi-Part upload: recommended for files > 100MB, must use for files > 5GB. Can help parallelize uploads (speed up transfers)
+   - S3 Transfer Acceleration: Increase transfer speed by transferring file to an AWS edge location which will forward the data to the S3 bucket in the target region. Compatible with multi-part upload
+   - S3 Performance – S3 Byte-Range Fetches: Parallelize GETs by requesting specific byte ranges. Better resilience in case of failures
+ - S3 Select & Glacier Select: for simple filtering, Retrieve less data using SQL by performing server-side filtering using S3 select & glacier select. Can filter by rows & columns (simple SQL statements). Less network transfer, less CPU cost client-side
+ - S3 Batch Operations: Perform bulk operations on existing S3 objects with a single request, example: Encrypt un-encrypted objects, Invoke Lambda function to perform custom action on each object, Restore objects from S3 Glacier...
+   - A job consists of a list of objects, the action to perform, and optional parameters
+   - S3 Batch Operations manages retries, tracks progress, sends completion notifications, generate reports …
+   - You can use **S3 Inventory** to get object list and use S3 Select to filter your objects
 ## S3 Security
 ## CloudFront and Global Accelerator
 ## AWS Storage Extras
