@@ -586,6 +586,70 @@ bucket...
      - Good for HTTP use cases that require static IP addresses
      - Good for HTTP use cases that required deterministic, fast regional failover
 ## AWS Storage Extras
+ - AWS Snow Family: Highly-secure, portable devices to collect and process data at the edge, and migrate data into and out of AWS
+   - Data migration: Snowcone, Snowball edge, Snowmobile
+   - Edge computing: Snowcone, Snowball edge
+ - Data Migrations with AWS Snow Family
+   - AWS Snow Family: offline devices to perform data migrations. If it takes more than a week to transfer over the network, use Snowball devices!
+ - Snowball Edge (for data transfers): Physical data transport solution: move TBs or PBs of data in or out of AWS
+   - Pay per data transfer job
+   - Provide block storage and Amazon S3-compatible object storage
+   - Snowball Edge Storage Optimized: 80TB of HDD for block volume and S3 compatible object storage
+   - Snowball Edge Compute Optimized: 42 TB of HDD or 28TB NVMe capacity for block volume and S3 compatible object storage
+ - AWS Snowcone & Snowcone SSD: Small, portable computing, anywhere, rugged & secure, withstands harsh environments
+   - Snowcone– 8 TB of HDD Storage
+   - Snowcone SSD – 14 TB of SSD Storage
+   - Use Snowcone where Snowball does not fit (space-constrained environment)
+   - Must provide your own battery / cables
+   - Can be sent back to AWS offline, or connect it to internet and use AWS **DataSync** to send data
+ - AWS Snowmobile
+   - Transfer exabytes of data (1 EB = 1,000 PB = 1,000,000 TBs)
+   - Each Snowmobile has 100 PB of capacity (use multiple in parallel)
+   - Better than Snowball if you transfer more than 10 PB
+   - High security: temperature controlled, GPS, 24/7 video surveillance
+ - Snow Family – Usage Process
+   - Request Snowball devices from the AWS console for delivery
+   - Install the snowball client / AWS OpsHub on your servers
+   - Connect the snowball to your servers and copy files using the client
+   - Ship back the device when you’re done (goes to the right AWS facility)
+   - Data will be loaded into an S3 bucket
+   - Snowball is completely wiped
+ - What is Edge Computing?
+   - Process data while it’s being created on an edge location (Limited / no internet access, Limited / no easy access to computing power)
+   - We setup a Snowball Edge / Snowcone device to do edge computing
+   - Use cases of Edge Computing: Preprocess data, Machine learning at the edge, Transcoding media streams
+   - Eventually (if need be) we can ship back the device to AWS (for transferring data for example)
+ - Snow Family – Edge Computing
+   - Snowcone & Snowcone SSD (smaller): 2 CPUs, 4 GB of memory, wired or wireless access. USB-C power using a cord or the optional battery
+   - Snowball Edge – Compute Optimized: 104 vCPUs, 416 GiB of RAM, Optional GPU (useful for video processing or machine learning), 28TB NVMe or 42TB HDD usable storage, Storage Clustering available (up to 16 nodes)
+   - Snowball Edge – Storage Optimized: Up to 40 vCPUs, 80 GiB of RAM, 80 TB storage
+   - All: Can run EC2 Instances & AWS Lambda functions (using AWS IoT Greengrass)
+   - Long-term deployment options: 1 and 3 years discounted pricing
+ - AWS OpsHub: Historically, to use Snow Family devices, you needed a CLI (Command Line Interface tool), Today, you can use AWS OpsHub (a software you install on your computer / laptop) to manage your Snow Family Device: configuration, management, monitoring, running compatible AWS services.
+ - Solution Architecture: Snowball into Glacier
+   - **Snowball cannot import to Glacier directly.** You must use Amazon S3 first, in combination with an S3 lifecycle policy
+ - Amazon FSx – Overview: Fully managed service, Launch 3rd party high-performance file systems on AWS
+   - FSx for Lustre(Linux & cluster): Lustre is a type of parallel distributed file system, for large-scale computing
+     - Machine Learning, `High Performance Computing (HPC)`
+     - `Seamless integration with S3` (read and write through FSx)
+     - storage options: HDD & SDD
+     - Video Processing, Financial Modeling, Electronic Design Automation
+     - `Can be used from on-premises servers (VPN or Direct Connect)`
+   - FSx for NetApp ONTAP
+   - FSx for Windows File Server: FSx for Windows is a fully managed Windows file system share drive
+     - Supports SMB protocol & Windows NTFS
+     - Microsoft Active Directory integration, ACLs, user quotas
+     - `Can be mounted on Linux EC2 instances`
+     - Supports `Microsoft's Distributed File System (DFS) Namespaces` (group files across multiple FS)
+     - Can be accessed from your on-premises infrastructure (VPN or Direct Connect)
+     - Can be configured to be Multi-AZ (high availability)
+     - Data is backed-up daily to S3
+     - Storage Options: SDD & HDD
+   - FSx for OpenZFS
+ - FSx Lustre - File System Deployment Options
+   - Scratch File System
+   - Persistent File System
+
 ## AWS Integration and Messaging
 ## Containers on AWS
 ## Serverless Overview
