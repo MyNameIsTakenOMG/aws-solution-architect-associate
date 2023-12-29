@@ -455,6 +455,78 @@ distribution…)
    - S3 Batch Operations manages retries, tracks progress, sends completion notifications, generate reports …
    - You can use **S3 Inventory** to get object list and use S3 Select to filter your objects
 ## S3 Security
+ - Amazon S3 – Object Encryption: You can encrypt objects in S3 buckets using one of 4 methods
+   - Server-Side Encryption with Amazon S3-Managed Keys (SSE-S3) – Enabled by Default
+     - Encryption type is AES-256, owned by AWS
+     - Enabled by default for new buckets & new objects
+     - Must set header "x-amz-server-side-encryption": "AES256"
+   - Server-Side Encryption with KMS Keys stored in AWS KMS (SSE-KMS)
+     - Encryption using keys handled and managed by AWS KMS (Key Management Service)
+     - KMS advantages: user control + audit key usage using CloudTrail
+     - Must set header "x-amz-server-side-encryption": "aws:kms"
+     - KMS limits: request quotas
+   - Server-Side Encryption with Customer-Provided Keys (SSE-C)
+     - clients keep keys, Server-Side Encryption using keys fully managed by the customer outside of AWS
+     - HTTPS must be used
+     - Encryption key must provided in HTTP headers, for every HTTP request made
+   - Client-Side Encryption
+     - Use client libraries such as Amazon S3 Client-Side Encryption Library
+     - Customer fully manages the keys and encryption cycle
+     - clients must encrypt/decrypt data themselves
+ - Amazon S3 – Encryption in transit (SSL/TLS): Encryption in flight is also called SSL/TLS
+   - HTTP Endpoint – non encrypted
+   - HTTPS Endpoint – encryption in flight (recommended, HTTPS is mandatory for SSE-C. Force encryption in flight by using resource access policy with condition: secureTransport)
+ - Amazon S3 – Default Encryption vs. Bucket Policies
+   - SSE-S3 encryption is automatically applied to new objects stored in S3 bucket
+   - Optionally, you can “force encryption” using a bucket policy and refuse any API call to PUT an S3 object without encryption headers (SSE-KMS or SSE-C)
+   - Note: Bucket Policies are evaluated before “Default Encryption”
+ - What is CORS? (Cross-Origin Resource Sharing (CORS), Origin = scheme (protocol) + host (domain) + port)
+   - Web Browser based mechanism to allow requests to other origins while visiting the main origin
+   - The requests won’t be fulfilled unless the other origin allows for the requests, using CORS Headers (example: Access-Control-Allow-Origin)
+ - Amazon S3 – CORS: If a client makes a cross-origin request on our S3 bucket, we need to enable the correct CORS headers
+ - Amazon S3 – MFA Delete: MFA (Multi-Factor Authentication) – force users to generate a code on a device (usually a mobile phone or hardware) before doing important operations on S3
+   - MFA will be required to: Permanently delete an object version, Suspend Versioning on the bucket
+   - MFA won’t be required to: Enable Versioning, List deleted versions
+   - To use MFA Delete, Versioning must be enabled on the bucket
+   - Only the bucket owner (root account) can enable/disable MFA Delete
+ - S3 Access Logs
+   - For audit purpose, you may want to log all access to S3 buckets
+   - Any request made to S3, from any account, authorized or denied, will be logged into another S3 bucket
+   - That data can be analyzed using data analysis tools… (Athena)
+   - The target logging bucket must be in the same AWS region
+   - **warning:** Do not set your logging bucket to be the monitored bucket, It will create a logging loop, and your bucket will grow exponentially.
+ - Amazon S3 – Pre-Signed URLs
+   - Generate pre-signed URLs using the S3 Console, AWS CLI or SDK
+   - Users given a pre-signed URL inherit the permissions of the user that generated the URL for GET / PUT
+   - URL Expiration:
+     - S3 Console – 1 min up to 720 mins (12 hours)
+     - AWS CLI – configure expiration with --expires-in parameter in seconds (default 3600 secs, max. 604800 secs ~ 168 hours)
+   - examples: Allow temporarily a user to upload a file to a precise location in your S3 bucket; Allow only logged-in users to download a premium video from your S3
+bucket...
+ - S3 Glacier Vault Lock
+   - Adopt a WORM (Write Once Read Many) model
+   - Create a Vault Lock Policy
+   - Lock the policy for future edits (can no longer be changed or deleted)
+   - Helpful for compliance and data retention
+ - S3 Object Lock (versioning must be enabled)
+   - Adopt a WORM (Write Once Read Many) model
+   - Block an object version deletion for a specified amount of time
+   - Retention mode - Compliance: Object versions can't be overwritten or deleted by any user, including the root user. Objects retention modes can't be changed, and retention periods can't be shortened
+   - Retention mode - Governance: Most users can't overwrite or delete an object version or alter its lock settings. Some users have special permissions to change the retention or delete the object.
+   - Retention Period: protect the object for a fixed period, it can be extended
+   - Legal Hold: protect the object indefinitely, independent from retention period. can be freely placed and removed using the s3:PutObjectLegalHold IAM permission
+ - S3 – Access Points: Access Points simplify security management for S3 Buckets
+   - Each Access Point has:
+     - its own DNS name (Internet Origin or VPC Origin)
+     - an access point policy (similar to bucket policy) – manage security at scale
+ - S3 – Access Points –VPC Origin
+   - We can define the access point to be accessible only from within the VPC
+   - You must create a VPC Endpoint to access the Access Point (Gateway or Interface Endpoint)
+   - The VPC Endpoint Policy must allow access to the target bucket and Access Point
+ - S3 Object Lambda
+   - Use AWS Lambda Functions to change the object before it is retrieved by the caller application
+   - Only one S3 bucket is needed, on top of which we create S3 Access Point and S3 Object Lambda Access Points.
+   - Use Cases: Converting across data formats, such as converting XML to JSON. Redacting personally identifiable information for analytics or non-production environments.
 ## CloudFront and Global Accelerator
 ## AWS Storage Extras
 ## AWS Integration and Messaging
