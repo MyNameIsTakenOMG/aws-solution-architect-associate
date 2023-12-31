@@ -877,6 +877,90 @@ bucket...
  - Time series:AmazonTimestream
    - Fully managed, fast, scalable, serverless time series database. Automatically scales up/down to adjust capacity. Store and analyze trillions of events per day. 1000s times faster & 1/10th the cost of relational databases. Scheduled queries, multi-measure records, SQL compatibility. Data storage tiering: recent data kept in memory and historical data kept in a cost-optimized storage. Built-in time series analytics functions (helps you identify patterns in your data in near real-time). Encryption in transit and at rest. Use cases: IoT apps, operational applications, real-time analytics, ...
 ## Data and Analytics
+ - Amazon Athena:
+   - Serverless query service to analyze data stored in Amazon S3
+   - Uses standard SQL language to query the files (built on Presto)
+   - Supports CSV, JSON, ORC, Avro, and Parquet
+   - Commonly used with Amazon Quicksight for reporting/dashboards
+   - Use cases: Business intelligence / analytics / reporting, analyze & queryVPC Flow Logs,ELB Logs,CloudTrail trails,etc...
+   - Performance Improvement
+     - Use columnar data for cost-savings (less scan): Apache Parquet or ORC is recommended. Use Glue to convert your data to Parquet or ORC
+     - Compress data for smaller retrievals (bzip2, gzip, lz4, snappy, zlip, zstd...)
+     - Partition datasets in S3 for easy querying on virtual columns
+     - Use larger files (> 128 MB) to minimize overhead
+     - Federated Query: Allows you to run SQL queries across data stored in relational, non-relational, object, and custom data sources (AWS or on-premises). Uses Data Source Connectors that run on AWS Lambda to run Federated Queries (e.g., CloudWatch Logs, DynamoDB, RDS, ...). Store the results back in Amazon S3.
+ - Redshift Overview
+   - Redshift is based on PostgreSQL, but it’s not used for OLTP
+   - It’s OLAP – online analytical processing (analytics and data warehousing)
+   - 10x better performance than other data warehouses, scale to PBs of data
+   - Columnar storage of data (instead of row based) & parallel query engine
+   - Pay as you go based on the instances provisioned
+   - Has a SQL interface for performing the queries
+   - BI tools such as Amazon Quicksight or Tableau integrate with it
+   - vs Athena: faster queries / joins / aggregations thanks to indexes
+ - Redshift Cluster
+   - Leader node: for query planning, results aggregation
+   - Compute node: for performing the queries, send results to leader
+   - You provision the node size in advance
+   - You can used Reserved Instances for cost savings
+ - Redshift – Snapshots & DR
+   - Redshift has “Multi-AZ” mode for some clusters
+   - Snapshots are point-in-time backups of a cluster, stored internally in S3
+   - Snapshots are incremental (only what has changed is saved).
+   - You can restore a snapshot into a new cluster
+   - Automated: every 8 hours, every 5 GB, or on a schedule. Set retention between 1 to 35 days. Manual: snapshot is retained until you delete it
+   - You can configure Amazon Redshift to automatically copy snapshots (automated or manual) of a cluster to another AWS Region
+ - Loading data into Redshift: Large inserts are MUCH better
+   - Amazon Kinesis Data Firehose
+   - S3 using COPY command
+   - EC2 Instance JDBC driver
+ - Redshift Spectrum
+   - Query data that is already in S3 without loading it (Redshift cluster -- Redshift spectrum -- S3)
+   - Must have a Redshift cluster available to start the query
+   - The query is then submitted to thousands of Redshift Spectrum nodes
+ - Amazon OpenSearch Service (Elastic Search)
+   - In DynamoDB, queries only exist by primary key or indexes...
+   - With OpenSearch, you can search any field, even par tially matches
+   - It’s common to use OpenSearch as a complement to another database
+   - Two modes: managed cluster or serverless cluster
+   - Does not natively support SQL (can be enabled via a plugin)
+   - Ingestion from Kinesis Data Firehose, AWS IoT, and CloudWatch Logs
+   - Security through Cognito & IAM, KMS encryption,TLS
+   - Comes with OpenSearch Dashboards (visualization)
+ - OpenSearch patterns
+   - DynamoDB (start with querying with openSearch, then use the results to retrieve items from DynamoDB. DynamoDB must enable DynamoDB stream and use a lambda function to write data into OpenSearch)
+   - CloudWatch Logs (CloudWatch logs -- subscription filter -- Lambda / Kinesis Data Firehose -- OpenSearch (lambda: real-time, Kinesis: near real-time))
+   - Kinesis Data Streams & Kinesis Data Firehose : can put a lambda in the middle to do data transformation
+ - Amazon EMR: Elastic MapReduce
+   - EMR helps creating Hadoop clusters (Big Data) to analyze and process vast amount of data
+   - The clusters can be made of hundreds of EC2 instances
+   - EMR comes bundled with Apache Spark, HBase, Presto, Flink...
+   - EMR takes care of all the provisioning and configuration
+   - Auto-scaling and integrated with Spot instances
+   - Use cases: data processing, machine learning, web indexing, big data...
+ - Amazon EMR – Node types & purchasing
+   - Master Node: Manage the cluster, coordinate, manage health – long running
+   - Core Node: Run tasks and store data – long running
+   - Task Node (optional): Just to run tasks – usually Spot
+   - Purchasing options: on-demand, Reserved(min 1 yr), Spot Instances
+   - Can have long-running cluster, or transient (temporary) cluster
+ - Amazon QuickSight: Serverless machine learning-powered business intelligence service to create interactive dashboards
+   - Fast, automatically scalable, embeddable, with per-session pricing
+   - Use cases: Business analytics, Building visualizations, Perform ad-hoc analysis, Get business insights using data
+   - Integrated with RDS, Aurora, Athena, Redshift, S3...
+   - In-memory computation using SPICE engine if data is imported into QuickSight
+   - Enterprise edition: Possibility to setup Column-Level security (CLS)
+   - QuickSight Integrations: Aws services, SaaS, import files, on-prem
+   - Dashboard & Analysis:
+     - Define Users (standard versions) and Groups (enterprise version), These users & groups only exist within QuickSight, not IAM !!
+     - A dashboard is a read-only snapshot of an analysis that you can share, preserves the configuration of the analysis (filtering, parameters, controls, sort).
+     - You can share the analysis or the dashboard with Users or Groups
+     - To share a dashboard, you must first publish it
+     - Users who see the dashboard can also see the underlying data
+ - AWS Glue
+   - Managed extract, transform, and load (ETL) service
+   - Useful to prepare and transform data for analytics
+   - Fully serverless service
 ## Machine Learning
  - Rekognition: face detection, content moderation(Set a **Minimum Confidence Threshold** for items that will be flagged. Flag sensitive content for manual review in
 Amazon Augmented AI (A2I)), labeling, celebrity recognition -- detect objects, people, text, and scenes in images or videos
