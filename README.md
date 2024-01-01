@@ -961,6 +961,65 @@ bucket...
    - Managed extract, transform, and load (ETL) service
    - Useful to prepare and transform data for analytics
    - Fully serverless service
+   - Convert data into Parquet format(better format for Athena to query data): using Lambda or eventbridge to trigger aws glue ETL job
+   - Glue Data Catalog: catalog of datasets
+     - AWS Glue Data Crawler: write metadata of your data sources into AWS Glue Data Catalog tables(different schemas), then services like Athena, redshift spectrum, or EMR will leverage those tables
+   - Glue Job Bookmarks: prevent re-processing old data
+   - Glue Elastic Views: Combine and replicate data across multiple data stores using SQL. No custom code, Glue monitors for changes in the source data, serverless. Leverages a “virtual table” (materialized view).
+   - Glue DataBrew: clean and normalize data using pre-built transformation
+   - Glue Studio: new GUI to create, run and monitor ETL jobs in Glue
+   - Glue Streaming ETL (built on Apache Spark Structured Streaming): compatible with Kinesis Data Streaming, Kafka, MSK (managed Kafka)
+ - AWS Lake Formation
+   - Data lake = central place to have all your data for analytics purposes
+   - Fully managed service that makes it easy to setup a data lake in days
+   - Discover, cleanse, transform, and ingest data into your Data Lake
+   - It automates many complex manual steps (collecting, cleansing, moving, cataloging data, ...) and de-duplicate (using ML Transforms)
+   - Combine structured and unstructured data in the data lake
+   - Out-of-the-box source blueprints: S3, RDS, Relational & NoSQL DB...
+   - Fine-grained Access Control for your applications (row and column-level)
+   - Built on top of AWS Glue
+ - Kinesis Data Analytics (SQL application)
+   - Real-time analytics on Kinesis Data Streams & Firehose using SQL
+   - Add reference data from Amazon S3 to enrich streaming data
+   - Fully managed, no servers to provision, Automatic scaling
+   - Pay for actual consumption rate
+   - Output:
+     - Kinesis Data Streams: create streams out of the real-time analytics queries
+     - Kinesis Data Firehose: send analytics query results to destinations
+   - Use cases: Time-series analytics, Real-time dashboards, Real-time metrics
+ - Kinesis Data Analytics for Apache Flink (sources: Kinesis Data Streams & Amazon MSK)
+   - Use Flink (Java, Scala or SQL) to process and analyze streaming data
+   - Run any Apache Flink application on a managed cluster on AWS
+     - provisioning compute resources, parallel computation, automatic scaling
+     - application backups (implemented as checkpoints and snapshots)
+     - Use any Apache Flink programming features
+     - Flink does not read from Firehose (use Kinesis Analytics for SQL instead)
+ - Amazon Managed Streaming for Apache Kafka (Amazon MSK)
+   - Alternative to Amazon Kinesis
+   - Fully managed Apache Kafka on AWS
+     - Allow you to create, update, delete clusters
+     - MSK creates & manages Kafka brokers nodes & Zookeeper nodes for you
+     - Deploy the MSK cluster in your VPC, multi-AZ (up to 3 for HA)
+     - Automatic recovery from common Apache Kafka failures
+     - Data is stored on EBS volumes for **as long as you want**
+   - MSK Serverless
+     - Run Apache Kafka on MSK without managing the capacity
+     - MSK automatically provisions resources and scales compute & storage
+ - Kinesis Data Streams vs. Amazon MSK
+   - Kinesis Data Streams:
+     - 1 MB message size limit
+     - Data Streams with Shards
+     - Shard Splitting & Merging
+     - TLS In-flight encryption
+     - KMS at-rest encryption
+   - Amazon MSK
+     - 1MB default, configure for higher (ex: 10MB)
+     - KafkaTopics with Partitions
+     - Can only add partitions to a topic
+     - PLAINTEXT orTLS In-flight Encryption
+     - KMS at-rest encryption
+ - Amazon MSK Consumers: Kinesis Data Analytics for Apache Flink, AWS Glue Streaming ETL Jobs Powered by Apache Spark Streaming, Lambda, or apps on EC2 instances, ECS, EKS
+ - Big Data Ingestion Pipeline: Kinesis Data Streams --> Kinesis Data Firehose(lambda for transformation)-->S3-->SQS(optional)-->lambda-->Athena-->pull from S3-->put into S3(target)-->Redshift(not serverless)/Aws quicksight
 ## Machine Learning
  - Rekognition: face detection, content moderation(Set a **Minimum Confidence Threshold** for items that will be flagged. Flag sensitive content for manual review in
 Amazon Augmented AI (A2I)), labeling, celebrity recognition -- detect objects, people, text, and scenes in images or videos
