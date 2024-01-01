@@ -856,6 +856,199 @@ bucket...
    - doesn't scale as much as SQS, SNS
 ## Containers on AWS
 ## Serverless Overview
+ - What’s serverless? Serverless does not mean there are no servers... it means you just don’t manage / provision / see them. Serverless was pioneered by AWS Lambda but now also includes anything that’s managed: “databases, messaging, storage, etc.”
+ - Serverless in AWS: AWS Lambda, DynamoDB, AWS Cognito, AWS API Gateway, Amazon S3, AWS SNS & SQS, AWS Kinesis Data Firehose, Aurora Serverless, Step Functions, Fargate
+ - Lambda:
+   - Virtual functions – no servers to manage!
+   - Limits:
+     - short executions (limit: 15 min)
+     - Environment variables (4 KB)
+     - Memory allocation: 128 MB – 10GB (1 MB increments)
+     - Disk capacity in the “function container” (in /tmp): 512 MB to 10GB
+     - Concurrency executions: 1000 (can be increased)
+     - Deployment:
+       - Lambda function deployment size (compressed .zip): 50 MB
+       - Size of uncompressed deployment (code + dependencies): 250 MB
+       - Can use the /tmp directory to load other files at startup
+   - Run on-demand
+   - Scaling is automated!
+   - easy pricing: first 1 million calls are free, 400,000GB-seconds per month are free
+   - support multiple programming languages
+   - Integrated with the whole AWS suite of services
+   - Easy monitoring through AWS CloudWatch
+   - Increasing RAM will also improve CPU and network!
+   - snapstart: only support Java 11 or above. When enabled, the function is invoked from pre-initialized state. when publishes a new version, a snapshot of memory and disk will be taken.
+ - Customization At The Edge: Many modern applications execute some form of the logic at the edge
+   - Edge Function: A code that you write and attach to CloudFront distributions. Runs close to your users to minimize latency
+   - CloudFront provides two types: CloudFront Functions & Lambda@Edge
+   - You don’t have to manage any servers, deployed globally
+   - serverless
+   - Use case: customize the CDN content
+ - CloudFront Functions & Lambda@Edge Use Cases:
+   - Website Security and Privacy
+   - Bot Mitigation at the Edge
+   - Real-time Image Transformation
+   - A/BTesting
+   - User Authentication and Authorization
+   - Search Engine Optimization (SEO)
+   - User Tracking and Analytics
+ - CloudFront Functions
+   - Lightweight functions written in JavaScript
+   - For high-scale, latency-sensitive CDN customizations
+   - native feature, used to modify the viewer request and response
+   - Sub-ms startup times, millions of requests/second
+ - Lambda@Edge (more powerful, no free tier)
+   - Lambda functions written in NodeJS or Python
+   - Scales to 1000s of requests/second
+   - Used to change CloudFront requests and responses (viewer and origin)
+   - Author your functions in one AWS Region (us-east-1), then CloudFront replicates to its locations
+ - CloudFront Functions vs. Lambda@Edge - Use Cases
+   - CloudFront Functions: Cache key normalization. Header manipulation. URL rewrites or redirects. Request authentication & authorization.
+   - Lambda@Edge: Longer execution time (several ms). Adjustable CPU or memory. Your code depends on a 3rd libraries (e.g., AWS SDK to access other AWS services). Network access to use externaly services for processing. File system access or access to the body of HTTP requests.
+ - Lambda by default
+   - By default, your Lambda function is launched outside your own VPC (in an AWS-owned VPC)
+   - Therefore, it cannot access resources in your VPC (RDS, ElastiCache, internal ELB...)
+ - Lambda in VPC
+   - You must define the VPC ID, the Subnets and the Security Groups
+   - Lambda will create an ENI (Elastic Network Interface) in your subnets
+ - Lambda with RDS Proxy
+   - If Lambda functions directly access your database, they may open too many connections under high load
+   - RDS Proxy:
+     - Improve scalability by pooling and sharing DB connections
+     - Improve availability by reducing by 66% the failover time and preserving connections
+     - Improve security by enforcing IAM authentication and storing credentials in Secrets Manager
+   - **The Lambda function must be deployed in your VPC, because RDS Proxy is never publicly accessible**
+ - Invoking Lambda from RDS & Aurora
+   - Invoke Lambda functions from within your DB instance
+   - Allows you to process data events from within a database
+   - Supported for RDS for PostgreSQL and Aurora MySQL
+   - Must allow outbound traffic to your Lambda function from within your DB instance (Public, NAT GW,VPC Endpoints)
+   - DB instance must have the required permissions to invoke the Lambda function (Lambda Resource-based Policy & IAM Policy)
+ - RDS Event Notifications
+   - Notifications that tells information about the DB instance itself (created, stopped, start, ...)
+   - You don’t have any information about the data itself
+   - Subscribe to the following event categories: DB instance, DB snapshot, DB Parameter Group, DB Security Group, RDS Proxy, Custom Engine Version
+   - Near real-time events (up to 5 minutes)
+   - Send notifications to SNS or subscribe to events using EventBridge
+ - Amazon DynamoDB
+   - Fully managed, highly available with replication across multiple AZs
+   - NoSQL database - not a relational database - with transaction support
+   - Scales to massive workloads, distributed database
+   - Millions of requests per seconds, trillions of row, 100s of TB of storage
+   - Fast and consistent in performance (single-digit millisecond)
+   - Integrated with IAM for security, authorization and administration
+   - Low cost and auto-scaling capabilities
+   - No maintenance or patching, always available
+   - Standard & Infrequent Access (IA) Table Class
+   - Basics:
+     - DynamoDB is made of Tables
+     - Each table has a Primary Key (must be decided at creation time)
+     - Each table can have an infinite number of items (= rows)
+     - Each item has attributes (can be added over time – can be null)
+     - Maximum size of an item is 400KB
+     - Data types supported are: Scalar Types(primitives), Document Types – List, Map, Set Types – String Set, Number Set, Binary Set
+     - Therefore, in DynamoDB you can rapidly evolve schemas
+   - Read/Write Capacity Modes
+     - Control how you manage your table’s capacity (read/write throughput)
+     - Provisioned Mode (default): You specify the number of reads/writes per second. You need to plan capacity beforehand. Pay for provisioned Read Capacity Units (RCU) & Write Capacity Units (WCU). **Possibility to add auto-scaling mode for RCU & WCU**
+     - On-Demand Mode: Read/writes automatically scale up/down with your workloads. No capacity planning needed. Pay for what you use, more expensive ($$$). Great for unpredictable workloads, steep sudden spikes.
+   - DynamoDB Accelerator (DAX)
+     - Fully-managed, highly available, seamless in- memory cache for DynamoDB
+     - Help solve read congestion by caching
+     - Microseconds latency for cached data
+     - Doesn’t require application logic modification (compatible with existing DynamoDB APIs)
+     - 5 minutes TTL for cache (default)
+     - DynamoDB Accelerator (DAX) vs. ElastiCache
+       - Amazon ElastiCache: Store Aggregation Result
+       - DynamoDB Accelerator (DAX): - Individual objects cache - Query & Scan cache
+   - DynamoDB – Stream Processing
+     - Ordered stream of item-level modifications (create/update/delete) in a table
+     - Use cases: Real-time usage analytics. React to changes in real-time (welcome email to users). Invoke AWS Lambda on changes to your DynamoDB table. Implement cross-region replication. Insert into derivative tables
+     - 24 hrs retention, limited consumers Process using AWS Lambda Triggers, or DynamoDB Stream Kinesis adapter
+     - vs Kinesis Data Streams (newer):
+       - 1 yr retention, high number of consumers, Process using AWS Lambda, Kinesis Data Analytics, Kineis Data Firehose, AWS Glue Streaming ETL...
+   - DynamoDB Global Tables
+     - Make a DynamoDB table accessible with low latency in multiple-regions
+     - Active-Active replication (two-way replications)
+     - Applications can READ and WRITE to the table in any region
+     - `Must enable DynamoDB Streams as a pre-requisite`
+   - DynamoDB –TimeTo Live (TTL)
+     - Automatically delete items after an expiry timestamp
+     - Use cases: reduce stored data by keeping only current items, adhere to regulatory obligations, web session handling...
+   - Backups for disaster recovery
+     - Continuous backups using point-in-time recovery (PITR)
+       - Optionally enabled for the last 35 days
+       - Point-in-time recovery to any time within the backup window
+       - The recovery process creates a new table
+     - On-demand backups:
+       - Full backups for long-term retention, until explicitely deleted
+       - Doesn’t affect performance or latency
+       - Can be configured and managed in AWS Backup (enables cross-region copy)
+       - The recovery process creates a new table
+   - Integration with Amazon S3
+     - Export to S3 (must enable PITR)
+       - Works for any point of time in the last 35 days
+       - Doesn’t affect the read capacity of your table
+       - Perform data analysis on top of DynamoDB
+       - Retain snapshots for auditing
+       - ETL on top of S3 data before importing back into DynamoDB
+       - Export in DynamoDB JSON or ION format
+     - Import from S3
+       - Import CSV, DynamoDB JSON or ION format
+       - Doesn’t consume any write capacity
+       - Creates a new table
+       - Import errors are logged in CloudWatch Logs
+ - AWS API Gateway
+   - AWS Lambda + API Gateway: No infrastructure to manage
+   - Support for the WebSocket Protocol
+   - Handle API versioning (v1, v2...)
+   - Handle different environments (dev, test, prod...)
+   - Handle security (Authentication and Authorization)
+   - Create API keys, handle request throttling
+   - Swagger / Open API import to quickly define APIs
+   - Transform and validate requests and responses
+   - Generate SDK and API specifications
+   - Cache API responses
+ - API Gateway – Integrations High Level
+   - Lambda Function: Easy way to expose REST API backed by AWS Lambda
+   - HTTP: Expose HTTP endpoints in the backend. Example: internal HTTP API on premise, Application Load Balancer... Why? Add rate limiting, caching, user authentications, API keys, etc...
+   - AWS Service:Expose any AWS API through the API Gateway. Example: start an AWS Step Function workflow, post a message to SQS. Why? Add authentication, deploy publicly, rate control...
+ - API Gateway - Endpoint Types
+   - Edge-Optimized (default): For global clients Requests are routed through the CloudFront Edge locations (improves latency), The API Gateway still lives in only one region.
+   - Regional: For clients within the same region, Could manually combine with CloudFront (more control over the caching strategies and the distribution)
+   - Private: Can only be accessed from your VPC using an interface VPC endpoint (ENI). Use a resource policy to define access
+ - API Gateway – Security
+   - User Authentication through
+     - IAM Roles (useful for internal applications)
+     - Cognito (identity for external users – example mobile users)
+     - Custom Authorizer (your own logic)
+   - Custom Domain Name HTTPS security through integration with AWS Certificate Manager (ACM)
+     - If using Edge-Optimized endpoint, then the certificate must be in us-east-1
+     - If using Regional endpoint, the certificate must be in the API Gateway region
+     - Must setup CNAME or A-alias record in Route 53
+ - AWS Step Functions
+   - Build serverless visual workflow to orchestrate your Lambda functions
+   - Features: sequence, parallel, conditions, timeouts, error handling, ...
+   - Can integrate with EC2, ECS, On-premises servers, API Gateway, SQS queues, etc...
+   - Possibility of implementing human approval feature
+   - Use cases: order fulfillment, data processing, web applications, any workflow
+ - Amazon Cognito
+   - Give users an identity to interact with our web or mobile application
+   - Cognito User Pools:Sign in functionality for app users, Integrate with API Gateway & Application Load Balancer
+     - Create a serverless database of user for your web & mobile apps
+     - Simple login
+     - Password reset
+     - Email & Phone Number Verification
+     - Multi-factor authentication (MFA)
+     - Federated Identities: users from Facebook, Google, SAML...
+   - Cognito Identity Pools (Federated Identity):Provide AWS credentials to users so they can access AWS resources directly, Integrate with Cognito User Pools as an identity provider
+     - Get identities for “users” so they obtain temporary AWS credentials
+     - Users source can be Cognito User Pools, 3rd party logins, etc...
+     - Users can then access AWS services directly or through API Gateway
+     - The IAM policies applied to the credentials are defined in Cognito
+     - They can be customized based on the user_id for fine grained control
+     - Default IAM roles for authenticated and guest users
+   - Cognito vs IAM: “hundreds of users”, ”mobile users”, “authenticate with SAML”
 ## Serverless Architecture
 ## Databases in AWS
  - RDBMS (= SQL / OLTP): RDS, Aurora – great for joins
