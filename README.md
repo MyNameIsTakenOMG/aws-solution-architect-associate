@@ -346,7 +346,23 @@ using CloudWatch)
    - Advice: Use a ready-to-use AMI to reduce configuration time in order to be serving request fasters and reduce the cooldown period
 
 ## RDS Aurora and ElastiCache
+ - 
 ## Route53
+ - What is DNS? Domain Name System which translates the human friendly hostnames into the machine IP addresses
+ - DNS Terminologies:
+   - Domain Registrar: Amazon Route 53, GoDaddy, …
+   - DNS Records: A, AAAA, CNAME, NS, …
+   - Zone File: contains DNS records
+   - Name Server: resolves DNS queries (Authoritative or Non-Authoritative)
+   - Top Level Domain (TLD): .com, .us, .in, .gov, .org, …
+   - Second Level Domain (SLD): amazon.com, google.com, …
+ - Amazon Route 53
+   - A highly available, scalable, fully managed and Authoritative DNS: Authoritative = the customer (you) can update the DNS records
+   - Route 53 is also a Domain Registrar
+   - `Ability to check the health of your resources`
+   - The only AWS service which provides 100% availability SLA
+   - Why Route 53? 53 is a reference to the traditional DNS port
+
 ## Classic Solutions Architecture
  - stateless web app(maybe some api endpoints): Route53 -- client -- ELBs(ALB):Multi-AZ -- ASG(multi-az): EC2 reserved capacity (cost-saving)
    - cost: ASG to ensure right amount of EC2 instances, and reserved capacity instances
