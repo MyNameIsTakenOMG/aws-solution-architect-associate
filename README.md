@@ -2025,7 +2025,7 @@ unstructured clinical text. Uses NLP to detect **Protected Health Information (P
    - free for traffic-in and server-private-server(or EC2) in the same AZ, cost a little for AZ-1 -private- AZ-2, cost a bit more for AZ-1 -public- AZ-2, cost more for Region-1 -public- REgion-2
  - Minimizing egress traffic network cost
    - Try to keep as much internet traffic within AWS to minimize costs
-   - outbound traffic free
+   - inbound traffic free
    - Direct Connect location that are co-located in the same AWS Region result in lower cost for egress network
  - S3 Data Transfer Pricing – Analysis for USA
    - ingress free
