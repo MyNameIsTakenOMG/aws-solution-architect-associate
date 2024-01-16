@@ -2295,13 +2295,18 @@ reaching limits
 
 ## Filling Gaps
  - Table of Contents
-   - [test 0](#test-0)
-   - [test 1](#test-1)
-   - [test 2](#test-2)
-   - [test 3](#test-3)
-   - [test 4](#test-4)
-   - [test 5](#test-5)
-   - [test 6](#test-6)
- - ### Test 0
+   - test-0
+   - test-1
+   - test-2:
+     - RDS replicas can only allow `read` operations
+     - RDS: multi-AZ synchronous, multi-region asynchronous (Aurora -- asynchronous)
+     - transit gateway: AWS Transit Gateway is a service that enables customers to connect their Amazon Virtual Private Clouds (VPCs) and their on-premises networks to a single gateway.
+     - spread placement group: limits: 7 instances per AZ per group, meaning 21 instances for 3 AZ
+     - Kinesis Agent is a stand-alone Java software application that offers an easy way to collect and send data to Amazon Kinesis Data Streams or Amazon Kinesis Firehose.
+     -  use a lifecycle policy to transition the raw zone data into Amazon S3 Glacier Deep Archive after 1 day of object creation. the best optimization is to have the refined zone data stored in a compressed format via the Glue job. The compressed data would reduce the storage cost incurred on the data in the refined zone.
+   - test-3
+   - test-4
+   - test-5
+   - test-6
 
 
